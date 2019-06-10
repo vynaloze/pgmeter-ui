@@ -1,0 +1,25 @@
+.Sidebar {
+    width: 202px;
+    color: var(--light-blue);
+    background: var(--charcoal);
+}
+
+.Sidebar li {
+    font-weight: 400;
+}
+
+.Sidebar a.active,
+.Sidebar a:hover {
+    color: var(--blue);
+    background: #18191b;
+    border-left: 8px solid var(--blue);
+}
+
+.Sidebar a {
+    color: var(--light-blue);
+    display: block;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+/*.Sidebar .fa { margin-right: 15px; }*/

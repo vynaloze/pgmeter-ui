@@ -1,0 +1,35 @@
+@import url('https://code.cdn.mozilla.net/fonts/fira.css');
+
+* {
+    font-family: 'Fira Mono', monospace;
+    --dark: #1b1b1e;
+    --charcoal: #373f51;
+    --blue: #55c8f0;
+    --light-blue: #a9bcd0;
+    --white: #d8dbe2;
+}
+
+body {
+    font-size: 13px;
+    background: var(--dark);
+}
+
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+a:hover {
+    text-decoration: none;
+}
+
+nav li {
+    list-style: none;
+}
+
+.horizontal {
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+}

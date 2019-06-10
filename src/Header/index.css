@@ -1,0 +1,13 @@
+.Header {
+    color: var(--white);
+    background: var(--charcoal);
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+}
+
+.Header-title {
+    padding: 5px 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
