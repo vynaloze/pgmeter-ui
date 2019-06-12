@@ -1,28 +1,18 @@
 import React from 'react';
+import {connect} from "react-redux";
+import {setTimeRange} from "../_redux/actions";
 import DateTimeRangeContainer from 'react-advanced-datetimerange-picker'
 import moment from "moment"
 import './TimeRange.css'
 
 class TimeRange extends React.Component {
-
     constructor(props) {
         super(props);
-        let start = moment().subtract(1, "hour");
-        let end = moment();
-        this.state = {
-            start: start,
-            end: end
-        };
-
         this.applyCallback = this.applyCallback.bind(this);
     }
 
     applyCallback(startDate, endDate) {
-        this.setState({
-                start: startDate,
-                end: endDate
-            }
-        )
+        this.props.setTimeRange(startDate, endDate)
     }
 
     render() {
@@ -46,19 +36,29 @@ class TimeRange extends React.Component {
             <div className="TimeRange horizontal">
                 <DateTimeRangeContainer
                     ranges={ranges}
-                    start={this.state.start}
-                    end={this.state.end}
+                    start={this.props.start}
+                    end={this.props.end}
                     local={local}
                     applyCallback={this.applyCallback}
                     autoApply={true}
                 >
                     <div className="click-area"/>
                 </DateTimeRangeContainer>
-                <input value={this.state.start.format(local.format) + " / " + this.state.end.format(local.format)}
+                <input value={this.props.start.format(local.format) + " / " + this.props.end.format(local.format)}
                        type="text" className="info-box" placeholder="TIME RANGE" readOnly={true}/>
             </div>
         );
     }
 }
 
-export default TimeRange
+function mapStateToProps(state) {
+    return {
+        start: state.timeRange.start,
+        end: state.timeRange.end,
+    }
+}
+
+export default connect(
+    mapStateToProps,
+    {setTimeRange}
+)(TimeRange);
