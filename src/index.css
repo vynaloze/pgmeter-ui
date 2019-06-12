@@ -24,10 +24,6 @@ a:hover {
     text-decoration: none;
 }
 
-nav li {
-    list-style: none;
-}
-
 .horizontal {
     display: -webkit-flex;
     display: -ms-flexbox;
