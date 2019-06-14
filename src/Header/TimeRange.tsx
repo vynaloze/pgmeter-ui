@@ -1,17 +1,30 @@
 import React from 'react';
 import {connect} from "react-redux";
-import {setTimeRange} from "../_redux/actions";
+// @ts-ignore
 import DateTimeRangeContainer from 'react-advanced-datetimerange-picker'
-import moment from "moment"
+import moment, {Moment} from "moment"
+import {AppState} from "../_store";
+import {setTimeRange} from "../_store/timeRange/actions";
 import './TimeRange.css'
 
-class TimeRange extends React.Component {
-    constructor(props) {
+interface StateFromProps {
+    start: Moment
+    end: Moment
+}
+
+interface DispatchFromProps {
+    setTimeRange: typeof setTimeRange
+}
+
+type Props = StateFromProps & DispatchFromProps
+
+class TimeRange extends React.Component<Props> {
+    constructor(props: any) {
         super(props);
         this.applyCallback = this.applyCallback.bind(this);
     }
 
-    applyCallback(startDate, endDate) {
+    applyCallback(startDate: Moment, endDate: Moment) {
         this.props.setTimeRange(startDate, endDate)
     }
 
@@ -51,14 +64,14 @@ class TimeRange extends React.Component {
     }
 }
 
-function mapStateToProps(state) {
+function mapStateToProps(state: AppState): StateFromProps {
     return {
         start: state.timeRange.start,
         end: state.timeRange.end,
     }
 }
 
-export default connect(
+export default connect<StateFromProps, DispatchFromProps, {}, AppState>(
     mapStateToProps,
     {setTimeRange}
 )(TimeRange);

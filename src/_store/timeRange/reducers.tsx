@@ -1,12 +1,12 @@
-import moment from 'moment';
-import {SET_TIME_RANGE} from "../actions";
+import moment from "moment";
+import {SET_TIME_RANGE, TimeRangeActions, TimeRangeState} from "./types";
 
-const initialTimeRange = {
+const initialTimeRange: TimeRangeState = {
     start: moment().subtract(1, "hour"),
     end: moment(),
 };
 
-export default function (state = initialTimeRange, action) {
+export function timeRangeReducer(state = initialTimeRange, action: TimeRangeActions): TimeRangeState {
     switch (action.type) {
         case SET_TIME_RANGE:
             return Object.assign({}, state, {
