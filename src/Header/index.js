@@ -1,7 +1,9 @@
 import React from 'react';
 import './index.css';
 import TimeRange from "./TimeRange";
+import Datasources from "./Datasources";
 
+// todo update button
 function Header() {
     return (
         <div className="Header">
@@ -11,7 +13,7 @@ function Header() {
             <div className="content container-fluid">
                 <div className="row" style={{height: '100%'}}>
                     <div className="col">
-                        datasource placeholder
+                        <Datasources/>
                     </div>
                     <div className="col align-right">
                         <TimeRange/>
@@ -19,7 +21,7 @@ function Header() {
                 </div>
             </div>
             <div className="content">
-                <button className="btn-refresh">
+                <button className="btn-refresh" onClick={() => alert('set autoupdate period')}>
                     <svg id="i-reload" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32"
                          height="32" fill="none" stroke="currentcolor" strokeLinecap="round"
                          strokeLinejoin="round" strokeWidth="2">
