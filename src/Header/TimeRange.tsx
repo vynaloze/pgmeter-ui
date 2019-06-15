@@ -58,7 +58,7 @@ class TimeRange extends React.Component<Props> {
                     <div className="click-area"/>
                 </DateTimeRangeContainer>
                 <input value={this.props.start.format(local.format) + " / " + this.props.end.format(local.format)}
-                       type="text" className="info-box" placeholder="TIME RANGE" readOnly={true}/>
+                       type="text" className="info-box" readOnly={true}/>
             </div>
         );
     }

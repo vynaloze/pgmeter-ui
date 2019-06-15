@@ -24,6 +24,20 @@
     justify-content: flex-end
 }
 
+.info-box {
+    height: 100%;
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: var(--dark);
+    border: none;
+    border-radius: 10px;
+    color: var(--white);
+    padding: 0 20px;
+    z-index: 1;
+    font-size-adjust: 0.6;
+}
+
 .btn-refresh {
     height: 44px;
     width: 44px;

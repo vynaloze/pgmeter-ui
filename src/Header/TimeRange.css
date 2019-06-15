@@ -5,18 +5,7 @@
 }
 
 .TimeRange .info-box {
-    height: 100%;
     width: 410px;
-    position: absolute;
-    top: 0;
-    right: 0;
-    background-color: var(--dark);
-    border: none;
-    border-radius: 10px;
-    color: var(--white);
-    padding: 0 20px;
-    z-index: 1;
-    font-size-adjust: 0.6;
 }
 
 .TimeRange .click-area {
@@ -28,6 +17,7 @@
     left: 0;
 }
 
+/* override style of datetime range picker */
 
 .TimeRange .daterangepicker {
     left: 5px !important;

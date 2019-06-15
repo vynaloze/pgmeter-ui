@@ -4,9 +4,12 @@ import {Moment} from "moment";
 // @ts-ignore
 import MultiSelect from "@kenshooui/react-multi-select";
 import "@kenshooui/react-multi-select/dist/style.css"
+// @ts-ignore
+import onClickOutside from "react-onclickoutside";
 import {Datasource} from "../_store/datasources/types";
 import {setDatasources, setSelectedDatasources} from "../_store/datasources/actions";
 import {AppState} from "../_store";
+import './Datasources.css'
 
 interface StateFromProps {
     all: Array<Datasource>
@@ -27,6 +30,7 @@ interface InternalState {
     loading: boolean
     all: Array<InternalDatasource>
     selected: Array<InternalDatasource>
+    selectBoxOpen: boolean
 }
 
 interface InternalDatasource {
@@ -43,8 +47,10 @@ class Datasources extends React.Component<Props, InternalState> {
             loading: true,
             all: toInternalDatasources(props.all),
             selected: toInternalDatasources(props.selected),
+            selectBoxOpen: false
         };
         this.handleChange = this.handleChange.bind(this);
+        this.toggleSelectBox = this.toggleSelectBox.bind(this);
     }
 
     componentDidMount() {
@@ -93,13 +99,32 @@ class Datasources extends React.Component<Props, InternalState> {
         this.props.setSelectedDatasources(toDatasources(selected));
     }
 
+    toggleSelectBox() {
+        this.setState({
+            selectBoxOpen: !this.state.selectBoxOpen
+        })
+    }
+
+    handleClickOutside = () => {
+        this.setState({
+            selectBoxOpen: false
+        })
+    };
+
     render() {
-        return <MultiSelect
-            items={this.state.all}
-            selectedItems={this.state.selected}
-            onChange={this.handleChange}
-            loading={this.state.loading}
-        />
+        return <div className="Datasources horizontal">
+            <input value={this.state.selected.map(s => s.label)}
+                   type="text" className="info-box align-right" readOnly={true} onClick={this.toggleSelectBox}/>
+            <div className="select-box">
+                {this.state.selectBoxOpen ?
+                    <MultiSelect
+                        items={this.state.all}
+                        selectedItems={this.state.selected}
+                        onChange={this.handleChange}
+                        loading={this.state.loading}
+                    /> : null}
+            </div>
+        </div>
     }
 }
 
@@ -143,4 +168,4 @@ function mapStateToProps(state: AppState): StateFromProps {
 export default connect<StateFromProps, DispatchFromProps, {}, AppState>(
     mapStateToProps,
     {setDatasources, setSelectedDatasources}
-)(Datasources);
+)(onClickOutside(Datasources));
