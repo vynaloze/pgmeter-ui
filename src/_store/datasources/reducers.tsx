@@ -9,30 +9,29 @@ import {
 const initialState: DatasourceState = {
     all: [],
     selected: [],
-    label: '%ip%/%database%'
+    labelTemplate: '%ip%/%database%'
 };
 
 export function datasourcesReducer(state = initialState, action: DatasourceActions): DatasourceState {
     switch (action.type) {
         case SET_DATASOURCES:
             const datasources = action.payload;
-            console.log(datasources);
             return {
                 all: datasources,
-                selected: state.selected.filter((s) => datasources.some((d) => s.internalIds.includes(d.id))),
-                label: state.label,
+                selected: state.selected.filter((s) => datasources.some((d) => s.id === d.id)),
+                labelTemplate: state.labelTemplate,
             };
         case SET_SELECTED_DATASOURCES:
             return {
                 all: state.all,
                 selected: action.payload,
-                label: state.label,
+                labelTemplate: state.labelTemplate,
             };
         case SET_DATASOURCE_LABEL:
             return {
                 all: state.all,
                 selected: state.selected,
-                label: action.payload,
+                labelTemplate: action.payload,
             };
         default:
             return state

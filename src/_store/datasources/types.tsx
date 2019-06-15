@@ -1,22 +1,16 @@
 export interface DatasourceState {
-    all: Array<BackendDatasource>
+    all: Array<Datasource>
     selected: Array<Datasource>
-    label: string
-}
-
-export interface BackendDatasource {
-    id: number
-    ip: string
-    hostname: string
-    port: number
-    database: string,
-    tags: JSON
+    labelTemplate: string
 }
 
 export interface Datasource {
     id: number
-    label: string
-    internalIds: Array<number>
+    ip: string
+    hostname?: string
+    port?: number
+    database: string,
+    tags: JSON
 }
 
 export const SET_DATASOURCES = 'SET_DATASOURCES';
@@ -25,7 +19,7 @@ export const SET_DATASOURCE_LABEL = 'SET_DATASOURCE_LABEL';
 
 export interface SetDatasources {
     type: typeof SET_DATASOURCES,
-    payload: Array<BackendDatasource>
+    payload: Array<Datasource>
 }
 
 export interface SetSelectedDatasources {
