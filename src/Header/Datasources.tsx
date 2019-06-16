@@ -16,6 +16,7 @@ interface StateFromProps {
     selected: Array<Datasource>
     start: Moment
     end: Moment
+    labelTemplate: string
 }
 
 interface DispatchFromProps {
@@ -45,8 +46,8 @@ class Datasources extends React.Component<Props, InternalState> {
         this.state = {
             error: null,
             loading: true,
-            all: toInternalDatasources(props.all),
-            selected: toInternalDatasources(props.selected),
+            all: toInternalDatasources(props.all, props.labelTemplate),
+            selected: toInternalDatasources(props.selected, props.labelTemplate),
             selectBoxOpen: false
         };
         this.handleChange = this.handleChange.bind(this);
@@ -74,7 +75,7 @@ class Datasources extends React.Component<Props, InternalState> {
             .then(
                 (result) => {
                     this.props.setDatasources(result);
-                    let all = toInternalDatasources(result);
+                    let all = toInternalDatasources(result, this.props.labelTemplate);
                     let oldSelected = this.state.selected.flatMap(s => s.representedBy);
                     let selected = all.filter(ds => ds.representedBy.some(d => oldSelected.includes(d)));
                     this.setState({
@@ -105,6 +106,7 @@ class Datasources extends React.Component<Props, InternalState> {
         })
     }
 
+    // don't delete me
     handleClickOutside = () => {
         this.setState({
             selectBoxOpen: false
@@ -128,7 +130,8 @@ class Datasources extends React.Component<Props, InternalState> {
     }
 }
 
-function toInternalDatasources(ds: Array<Datasource>): Array<InternalDatasource> {
+function toInternalDatasources(ds: Array<Datasource>, labelTemplate: string): Array<InternalDatasource> {
+    // first group all datasources by IP
     interface GroupedByIp {
         [ip: string]: Array<Datasource>
     }
@@ -138,13 +141,49 @@ function toInternalDatasources(ds: Array<Datasource>): Array<InternalDatasource>
         res[bd.ip].push(bd);
         return res;
     }, {} as GroupedByIp);
+    let groupedArray = Object.values(groupedByIp);
 
-    return Object.values(groupedByIp).map((value, index) => {
-        return {
-            id: index,
-            label: value[0].ip, // todo
-            representedBy: value
-        } as InternalDatasource
+    // than join each non-#system datasource with respective #system datasource of that machine
+    let internalDatasources = Array<InternalDatasource>();
+    for (let i = 0, newIndex = 0; i < groupedArray.length; i++) {
+        let group = groupedArray[i];
+        let indexOfSystemSource = group.findIndex(ds => ds.database === '#system');
+        // if there is only one datasource with such IP and it is #system, add it
+        if (group.length === 1 && indexOfSystemSource === 0) {
+            internalDatasources.push({
+                id: newIndex,
+                label: replaceLabel(group[0], labelTemplate),
+                representedBy: [group[0]]
+            });
+            newIndex++;
+        } // else,  exclude #system from results but add it as representedBy to each other datasource in the group
+        else {
+            for (let j = 0; j < group.length; j++) {
+                if (j !== indexOfSystemSource) {
+                    let representedBy = [group[j]];
+                    if (indexOfSystemSource !== -1) {
+                        representedBy.push(group[indexOfSystemSource])
+                    }
+                    internalDatasources.push({
+                        id: newIndex,
+                        label: replaceLabel(group[j], labelTemplate),
+                        representedBy: representedBy
+                    });
+                    newIndex++;
+                }
+            }
+        }
+    }
+    return internalDatasources;
+}
+
+function replaceLabel(datasource: any, labelTemplate: string): string {
+    console.log(datasource);
+    return labelTemplate.replace(/%\w+%/g, s => {
+        let key = s.slice(1, -1);
+        console.log(key);
+        console.log(datasource[key]);
+        return datasource[key]
     });
 }
 
@@ -161,7 +200,7 @@ function mapStateToProps(state: AppState): StateFromProps {
         end: state.timeRange.end,
         all: state.datasources.all,
         selected: state.datasources.selected,
-        // datasourceLabel: state.datasources.labelTemplate,
+        labelTemplate: state.datasources.labelTemplate,
     }
 }
 

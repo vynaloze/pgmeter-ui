@@ -4,19 +4,43 @@ import {connect} from "react-redux";
 import {TimeRangeState} from "../_store/timeRange/types";
 import {DatasourceState} from "../_store/datasources/types";
 import {AppState} from "../_store";
+import {setDatasourceLabel} from "../_store/datasources/actions";
 
 interface StateFromProps {
     timeRange: TimeRangeState
     datasources: DatasourceState
 }
 
-class Page1 extends React.Component<StateFromProps, {}> {
+interface DispatchFromProps {
+    setDatasourceLabel: typeof setDatasourceLabel
+}
+
+type Props = StateFromProps & DispatchFromProps
+
+class Page1 extends React.Component<Props, {}> {
+    // todo remove in future
+    withDb = false;
+
+    constructor(props: Props) {
+        super(props);
+        this.changeLabel = this.changeLabel.bind(this);
+    }
+
+    changeLabel() {
+        let label = this.withDb ? "%ip%/%database%" : "%ip%";
+        this.props.setDatasourceLabel(label);
+        this.withDb = !this.withDb;
+    }
+
     render() {
         return (
             <div className="Content">
                 Page1
                 <div>{this.props.timeRange.start.toString()}</div>
                 <div>{this.props.timeRange.end.toString()}</div>
+                Change label:
+                <button onClick={this.changeLabel}>{this.props.datasources.labelTemplate}</button>
+                <br/>
                 Selected:
                 <div>{JSON.stringify(this.props.datasources.selected)}</div>
                 All datasources:
@@ -33,6 +57,7 @@ function mapStateToProps(state: AppState): StateFromProps {
     }
 }
 
-export default connect<StateFromProps, {}, {}, AppState>(
-    mapStateToProps
+export default connect<StateFromProps, DispatchFromProps, {}, AppState>(
+    mapStateToProps,
+    {setDatasourceLabel}
 )(Page1);
