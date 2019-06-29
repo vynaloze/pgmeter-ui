@@ -20,7 +20,10 @@
     "react-router-dom": "^5.0.1",
     "react-scripts": "3.0.1",
     "redux": "^4.0.1",
-    "typescript": "^3.5.2"
+    "typescript": "^3.5.2",
+    "@nivo/line": "^0.59.1",
+    "react-table": "^6.8.4",
+    "@types/react-table": "^6.8.4"
   },
   "scripts": {
     "start": "react-scripts start",

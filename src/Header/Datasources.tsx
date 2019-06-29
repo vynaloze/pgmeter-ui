@@ -179,11 +179,11 @@ function toInternalDatasources(ds: Array<Datasource>, labelTemplate: string): Ar
 }
 
 function replaceLabel(datasource: any, labelTemplate: string): string {
-    console.log(datasource);
+    // console.log(datasource);
     return labelTemplate.replace(/%\w+%/g, s => {
         let key = s.slice(1, -1);
-        console.log(key);
-        console.log(datasource[key]);
+        // console.log(key);
+        // console.log(datasource[key]);
         return datasource[key]
     });
 }

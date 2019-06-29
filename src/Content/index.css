@@ -1,3 +1,101 @@
 .Content {
-    color: white;
+    color: var(--text);
+    width: 100%;
+}
+
+.Content .Element {
+    background: var(--bg-chart);
+    border-radius: 10px;
+    padding: 30px;
+    position: relative;
+    margin: 10px;
+    box-shadow: 0px 0px 1px 1px var(--dark-blue);
+
+}
+
+/*       */
+/* TABLE */
+/*       */
+
+.Content .Table {
+    height: min-content;
+    left: 0px;
+    right: 0px;
+    top: 0px;
+    bottom: 0px;
+}
+
+.Content .ReactTable {
+    border: 1px solid var(--bg-header);
+}
+
+/* Header */
+.Content .ReactTable .rt-thead.-header {
+    background: var(--bg-header);
+}
+
+.Content .ReactTable .rt-tbody .rt-tr-group {
+    border-bottom: solid 1px var(--bg-header);
+}
+
+/* Footer */
+.Content .ReactTable .-pagination {
+    background: var(--bg-header);
+}
+
+/* Footer buttons */
+.Content .ReactTable .-pagination .-btn {
+    color: var(--text);
+}
+
+.Content .ReactTable .-pagination .-btn:hover {
+    color: var(--blue);
+    background: var(--bg-header-hover);
+    border: 2px solid var(--blue);
+
+}
+
+.Content .ReactTable .-pagination .-btn[disabled]:hover {
+    color: var(--text);
+    background: var(--bg-header);
+    border: none;
+}
+
+/* Footer inputs - hide arrows */
+.Content .ReactTable .-pagination .-pageJump input {
+    background: var(--bg-chart);
+    color: var(--text);
+}
+
+.Content .ReactTable .-pagination .-pageJump input {
+    -moz-appearance: textfield;
+}
+
+.Content .ReactTable .-pagination .-pageJump input::-webkit-outer-spin-button,
+.Content .ReactTable .-pagination .-pageJump input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.Content .ReactTable .-pagination select {
+    color: var(--text);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: var(--bg-chart);
+    background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+    background-repeat: no-repeat;
+    background-position-x: 105%;
+    background-position-y: 3px;
+}
+
+/*       */
+/* CHART */
+/*       */
+
+.Content .Chart {
+    height: 300px;
+    left: 0px;
+    right: 0px;
+    top: 0px;
+    bottom: 0px;
 }

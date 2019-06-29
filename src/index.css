@@ -10,6 +10,10 @@
     --bg-header: #151b20;
     --bg-header-hover: #11171b;
     --text: #dee5ec;
+
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 body {
