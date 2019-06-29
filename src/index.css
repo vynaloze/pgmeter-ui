@@ -2,16 +2,19 @@
 
 * {
     font-family: 'Fira Mono', monospace;
-    --dark: #1b1b1e;
-    --charcoal: #373f51;
     --blue: #55c8f0;
-    --light-blue: #a9bcd0;
-    --white: #d8dbe2;
+    --dark-blue: #275889;
+
+    --bg-chart: #0e1317;
+    --bg-general: #1d262b;
+    --bg-header: #151b20;
+    --bg-header-hover: #11171b;
+    --text: #dee5ec;
 }
 
 body {
     font-size: 13px;
-    background: var(--dark);
+    background: var(--bg-general);
 }
 
 ul {

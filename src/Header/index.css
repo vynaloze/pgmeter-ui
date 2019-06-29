@@ -1,6 +1,6 @@
 .Header {
-    color: var(--white);
-    background: var(--charcoal);
+    color: var(--text);
+    background: var(--bg-header);
     display: -webkit-flex;
     display: -ms-flexbox;
     display: flex;
@@ -14,7 +14,7 @@
 
 .Header .content {
     padding: 12px 20px;
-    background: var(--charcoal);
+    background: var(--bg-header);
 }
 
 .Header .align-right {
@@ -29,10 +29,10 @@
     position: absolute;
     top: 0;
     right: 0;
-    background-color: var(--dark);
+    background-color: var(--bg-general);
     border: none;
     border-radius: 10px;
-    color: var(--white);
+    color: var(--text);
     padding: 0 20px;
     z-index: 1;
     font-size-adjust: 0.6;

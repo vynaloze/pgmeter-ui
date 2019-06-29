@@ -22,7 +22,7 @@
 .TimeRange .daterangepicker {
     left: 5px !important;
     top: 60px !important;
-    background: var(--charcoal)
+    background: var(--bg-header)
 }
 
 
@@ -32,25 +32,25 @@
 }
 
 .TimeRange .fromDateHourContainer, .activeNotifier {
-    background-color: var(--charcoal);
-    color: var(--white);
+    background-color: var(--bg-header);
+    color: var(--text);
 }
 
 .TimeRange .rangebuttonstyle {
-    background: var(--charcoal);
-    color: var(--white)
+    background: var(--bg-header);
+    color: var(--text)
 }
 
 .TimeRange .rangeButtonSelectedStyle {
-    background: var(--dark);
+    background: var(--bg-header);
     color: var(--blue);
     border-color: var(--blue);
     outline: none !important;
 }
 
 .TimeRange .form-control {
-    background: var(--dark);
-    color: var(--white);
+    background: var(--bg-header);
+    color: var(--text);
     font-size-adjust: 0.5;
 }
 
@@ -72,7 +72,7 @@
     outline: 0;
     box-shadow: none;
     border: 0 !important;
-    background: var(--dark);
+    background: var(--bg-header);
 }
 
 /* Remove IE arrow */
@@ -93,5 +93,5 @@
 .TimeRange .timeSelectContainer .applyButton {
     background-color: var(--blue) !important;
     border: 1px solid var(--blue);
-    color: var(--dark)
+    color: var(--bg-general)
 }

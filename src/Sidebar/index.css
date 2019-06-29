@@ -1,7 +1,7 @@
 .Sidebar {
     width: 202px;
-    color: var(--light-blue);
-    background: var(--charcoal);
+    color: var(--text);
+    background: var(--bg-header);
 }
 
 .Sidebar li {
@@ -11,12 +11,12 @@
 .Sidebar a.active,
 .Sidebar a:hover {
     color: var(--blue);
-    background: #18191b;
+    background: var(--bg-header-hover);
     border-left: 8px solid var(--blue);
 }
 
 .Sidebar a {
-    color: var(--light-blue);
+    color: var(--text);
     display: block;
     padding: 20px;
     transition: all 0.3s ease;

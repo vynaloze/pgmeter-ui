@@ -20,16 +20,21 @@
 }
 
 .Datasources .kn-multi_select__wrapper___30BEc, .kn-selection_status__status___1qxE9, .kn-search__input___2tyxf, ::placeholder {
-    color: var(--white);
-    background: var(--charcoal);
-    caret-color: var(--white);
+    color: var(--text);
+    background: var(--bg-header);
+    caret-color: var(--text);
+    border: 1px solid var(--bg-header);
 }
 
 .Datasources .kn-item__item___kQ2Ll:hover, .kn-item__selected___3tRL6, .kn-selected_item__selected_item___1uiiv:hover {
     color: var(--blue);
-    background-color: var(--dark);
+    background-color: var(--bg-general);
 }
 
 .Datasources .jss28 {
     fill: var(--blue)
+}
+
+.Datasources .kn-column__column___3Iwzx {
+    border-right: 1px solid var(--bg-header);
 }
