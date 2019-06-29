@@ -10,6 +10,7 @@ import {Datasource} from "../_store/datasources/types";
 import {setDatasources, setSelectedDatasources} from "../_store/datasources/actions";
 import {AppState} from "../_store";
 import './Datasources.css'
+import ApiClient from "../ApiClient";
 
 interface StateFromProps {
     all: Array<Datasource>
@@ -52,6 +53,7 @@ class Datasources extends React.Component<Props, InternalState> {
         };
         this.handleChange = this.handleChange.bind(this);
         this.toggleSelectBox = this.toggleSelectBox.bind(this);
+        this.updateDatasources = this.updateDatasources.bind(this);
     }
 
     componentDidMount() {
@@ -70,27 +72,26 @@ class Datasources extends React.Component<Props, InternalState> {
             error: null,
         });
 
-        fetch("http://localhost:3000/api/ds/" + this.props.start.unix() + "/" + this.props.end.unix()) //todo remember to change
-            .then(res => res.json())
-            .then(
-                (result) => {
-                    this.props.setDatasources(result);
-                    let all = toInternalDatasources(result, this.props.labelTemplate);
-                    let oldSelected = this.state.selected.flatMap(s => s.representedBy);
-                    let selected = all.filter(ds => ds.representedBy.some(d => oldSelected.includes(d)));
-                    this.setState({
-                        loading: false,
-                        all: all,
-                        selected: selected,
-                    });
-                },
-                (error) => {
-                    this.setState({
-                        loading: false,
-                        error
-                    });
-                }
-            )
+        ApiClient.getDatasources(this.props.start, this.props.end,
+            this.updateDatasources,
+            (error) => {
+                this.setState({
+                    loading: false,
+                    error
+                });
+            });
+    }
+
+    updateDatasources(result: any) {
+        this.props.setDatasources(result);
+        let all = toInternalDatasources(result, this.props.labelTemplate);
+        let oldSelected = this.state.selected.flatMap(s => s.representedBy);
+        let selected = all.filter(ds => ds.representedBy.some(d => oldSelected.includes(d)));
+        this.setState({
+            loading: false,
+            all: all,
+            selected: selected,
+        });
     }
 
     handleChange(selected: Array<InternalDatasource>) {
