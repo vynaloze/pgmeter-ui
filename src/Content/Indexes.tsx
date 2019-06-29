@@ -1,12 +1,12 @@
 import React from 'react';
 import './index.css';
 
-function Page2() {
+function Indexes() {
     return (
         <div className="Content">
-            Page2
+            Indexes
         </div>
     );
 }
 
-export default Page2;
+export default Indexes;

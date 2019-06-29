@@ -8,16 +8,28 @@ class Sidebar extends Component {
             <div className="Sidebar">
                 <ul>
                     <li>
-                        <NavLink to="/" activeClassName="active" exact={true}> Overview </NavLink>
+                        <NavLink to="/dev" activeClassName="active" exact={true}> Dev </NavLink>
                     </li>
                     <li>
-                        <NavLink to="/1" activeClassName="active" exact={true}> Page1 </NavLink>
+                        <NavLink to="/queries" activeClassName="active" exact={true}> Queries </NavLink>
                     </li>
                     <li>
-                        <NavLink to="/2" activeClassName="active" exact={true}> Page2 </NavLink>
+                        <NavLink to="/tables" activeClassName="active" exact={true}> Tables </NavLink>
                     </li>
                     <li>
-                        <NavLink to="/" activeClassName="active" exact={true}> ... </NavLink>
+                        <NavLink to="/indexes" activeClassName="active" exact={true}> Indexes </NavLink>
+                    </li>
+                    <li>
+                        <NavLink to="/system" activeClassName="active" exact={true}> System </NavLink>
+                    </li>
+                    <li>
+                        <NavLink to="/activity" activeClassName="active" exact={true}> Activity </NavLink>
+                    </li>
+                    <li>
+                        <NavLink to="/locks" activeClassName="active" exact={true}> Locks </NavLink>
+                    </li>
+                    <li>
+                        <NavLink to="/wal" activeClassName="active" exact={true}> WAL </NavLink>
                     </li>
                 </ul>
             </div>
