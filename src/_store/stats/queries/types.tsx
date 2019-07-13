@@ -1,9 +1,9 @@
-import {Table} from "../types";
+import {Table, XySeries} from "../types";
 
 export interface QueriesState {
     table: Array<QueriesTable>
-    timeChart: any
-    callsChart: any
+    timeChart: Array<XySeries>
+    callsChart: Array<XySeries>
 }
 
 export interface QueriesTable extends Table {
@@ -35,12 +35,12 @@ export interface SetQueriesTable {
 
 export interface SetQueriesTimeChart {
     type: typeof SET_QUERIES_TIME_CHART,
-    payload: any
+    payload: Array<XySeries>
 }
 
 export interface SetQueriesCallsChart {
     type: typeof SET_QUERIES_CALLS_CHART,
-    payload: any
+    payload: Array<XySeries>
 }
 
 export type QueriesActions = SetQueriesTable | SetQueriesTimeChart | SetQueriesCallsChart

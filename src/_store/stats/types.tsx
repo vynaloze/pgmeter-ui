@@ -5,3 +5,13 @@ export interface Table {
     datasource: Datasource
     id: string
 }
+
+export interface XySeries {
+    labels: Array<any>
+    datasets: Array<Series>
+}
+
+export interface Series {
+    label: any
+    data: Array<any>
+}

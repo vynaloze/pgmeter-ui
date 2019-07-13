@@ -2,11 +2,18 @@
 
 * {
     font-family: 'Fira Mono', monospace;
+    /*blues*/
     --blue: #55c8f0;
     --dark-blue: #275889;
 
+    /*yellow*/
+    /*--blue: #ffe53d;*/
+    /*--dark-blue: #6e7377;*/
+
     --bg-chart: #0e1317;
     --bg-general: #1d262b;
+    /*todo name*/
+    --bg-general-2: #23272a;
     --bg-header: #151b20;
     --bg-header-hover: #11171b;
     --text: #dee5ec;
@@ -18,7 +25,7 @@
 
 body {
     font-size: 13px;
-    background: var(--bg-general);
+    background: var(--bg-general-2);
 }
 
 ul {

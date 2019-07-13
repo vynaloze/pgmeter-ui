@@ -115,6 +115,7 @@ class Datasources extends React.Component<Props, InternalState> {
     };
 
     render() {
+        const maxSelectedItems = window.location.pathname === '/queries' ? 1 : 9999; //fixme this temp hack
         return <div className="Datasources horizontal">
             <input value={this.state.selected.map(s => s.label)}
                    type="text" className="info-box align-right" readOnly={true} onClick={this.toggleSelectBox}/>
@@ -125,6 +126,7 @@ class Datasources extends React.Component<Props, InternalState> {
                         selectedItems={this.state.selected}
                         onChange={this.handleChange}
                         loading={this.state.loading}
+                        maxSelectedItems={maxSelectedItems}
                     /> : null}
             </div>
         </div>

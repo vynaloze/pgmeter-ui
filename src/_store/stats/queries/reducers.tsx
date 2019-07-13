@@ -8,8 +8,8 @@ import {
 
 const initialState: QueriesState = {
     table: [],
-    timeChart: null,
-    callsChart: null,
+    timeChart: [],
+    callsChart: [],
 };
 
 export function queriesReducer(state = initialState, action: QueriesActions): QueriesState {
