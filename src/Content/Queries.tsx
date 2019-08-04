@@ -20,6 +20,7 @@ import TranslateRequest from "../ApiClient/body";
 import 'chartjs-plugin-colorschemes';
 import * as moment from "moment";
 import * as TimeUtils from "./TimeUtils";
+import {setMaxSelectedDatasources} from '../_store/datasources/actions';
 
 interface StateFromProps {
     timeRange: TimeRangeState
@@ -32,6 +33,7 @@ interface DispatchFromProps {
     setQueriesDisplayed: typeof setQueriesDisplayed,
     setQueriesTimeChart: typeof setQueriesTimeChart
     setQueriesCallsChart: typeof setQueriesCallsChart
+    setMaxSelectedDatasources: typeof setMaxSelectedDatasources
 }
 
 type Props = StateFromProps & DispatchFromProps
@@ -44,7 +46,12 @@ class Queries extends React.Component<Props, {}> {
     }
 
     componentDidMount(): void {
+        this.props.setMaxSelectedDatasources(1);
         this.fetchData()
+    }
+
+    componentWillUnmount(): void {
+        this.props.setMaxSelectedDatasources(9999);
     }
 
     componentDidUpdate(prevProps: Props, prevState: any, snapshot: any) {
@@ -239,5 +246,5 @@ function mapStateToProps(state: AppState): StateFromProps {
 
 export default connect<StateFromProps, DispatchFromProps, {}, AppState>(
     mapStateToProps,
-    {setQueriesTable, setQueriesDisplayed, setQueriesTimeChart, setQueriesCallsChart}
+    {setQueriesTable, setQueriesDisplayed, setQueriesTimeChart, setQueriesCallsChart, setMaxSelectedDatasources}
 )(Queries);
