@@ -18,6 +18,8 @@ import {XySeries} from "../_store/stats/types";
 import {Line} from 'react-chartjs-2';
 import TranslateRequest from "../ApiClient/body";
 import 'chartjs-plugin-colorschemes';
+import * as moment from "moment";
+import * as TimeUtils from "./TimeUtils";
 
 interface StateFromProps {
     timeRange: TimeRangeState
@@ -175,32 +177,29 @@ class Queries extends React.Component<Props, {}> {
         </ReactTable>
     }
 
-    renderChart(data: Array<XySeries>, labels: Array<string>, title: string): ReactNode {
+    renderChart(data: Array<XySeries>, series: Array<string>, title: string): ReactNode {
         if (typeof data === 'undefined' || data.length !== 1) {
             return <div>No data</div> //fixme
         }
-        const series = data[0];
+        const actualData = data[0];
+
         // make data depend on displayed table
-        const filteredLabels = series.labels.filter(l => labels.includes(l));
-        const filteredDatasets = series.datasets.filter(d => labels.includes(d.label));
+        const filteredDatasets = actualData.datasets.filter(d => series.includes(d.label));
 
-        // todo format displayed time depending on selected time range
-        series.labels = series.labels.map(l => new Date(l * 1000));
+        // format displayed time depending on selected time range
+        const sortedLabels = actualData.labels.sort();
+        const mappedLabels = sortedLabels.map(l => TimeUtils.FormatTime(moment.unix(sortedLabels[0]),
+            moment.unix(sortedLabels[sortedLabels.length - 1]), moment.unix(l)));
 
-        const res = {labels: filteredLabels, datasets: filteredDatasets};
+        console.log(mappedLabels);
 
-        return (<Line data={res}
+        return (<Line data={{labels: mappedLabels, datasets: filteredDatasets}}
                       legend={{position: 'bottom'}}
                       options={{
                           title: {
                               display: true,
                               text: title
                           },
-                          // scales: {
-                          //     xAxes: [{
-                          //         type: 'time',
-                          //     }]
-                          // },
                           maintainAspectRatio: false,
                           plugins: {
                               colorschemes: {
