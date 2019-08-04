@@ -7,7 +7,12 @@ import {DatasourceState} from "../_store/datasources/types";
 import {AppState} from "../_store";
 import {connect} from "react-redux";
 import ApiClient from "../ApiClient";
-import {setQueriesCallsChart, setQueriesTable, setQueriesTimeChart} from '../_store/stats/queries/actions';
+import {
+    setQueriesCallsChart,
+    setQueriesDisplayed,
+    setQueriesTable,
+    setQueriesTimeChart
+} from '../_store/stats/queries/actions';
 import {QueriesState, QueriesTablePayload} from "../_store/stats/queries/types";
 import {XySeries} from "../_store/stats/types";
 import {Line} from 'react-chartjs-2';
@@ -22,6 +27,7 @@ interface StateFromProps {
 
 interface DispatchFromProps {
     setQueriesTable: typeof setQueriesTable
+    setQueriesDisplayed: typeof setQueriesDisplayed,
     setQueriesTimeChart: typeof setQueriesTimeChart
     setQueriesCallsChart: typeof setQueriesCallsChart
 }
@@ -76,7 +82,7 @@ class Queries extends React.Component<Props, {}> {
             }
         } as TranslateRequest;
         ApiClient.getXyStats(timeChartRequest,
-            (response => this.props.setQueriesTimeChart(response)),
+            (response => this.props.setQueriesTimeChart(Array(response))),
             (error => alert(error))); // fixme error handling
 
         // calls chart
@@ -103,7 +109,7 @@ class Queries extends React.Component<Props, {}> {
             }
         } as TranslateRequest;
         ApiClient.getXyStats(callsChartRequest,
-            (response => this.props.setQueriesCallsChart(response)),
+            (response => this.props.setQueriesCallsChart(Array(response))),
             (error => alert(error))); // fixme error handling
     }
 
@@ -158,23 +164,43 @@ class Queries extends React.Component<Props, {}> {
         return <ReactTable
             data={data}
             columns={columns}
-            defaultPageSize={10}
-        />
+            defaultPageSize={10}>
+            {(tableState, makeTable, instance) => {
+                const displayedQueries = tableState.sortedData.slice(tableState.startRow, tableState.endRow).map(x => x.query);
+                if (this.props.queries.displayed.toString() !== displayedQueries.toString()) { //fixme why it is re-rendered so many times?
+                    this.props.setQueriesDisplayed(displayedQueries);
+                }
+                return makeTable()
+            }}
+        </ReactTable>
     }
 
-    renderChart(data: Array<XySeries>, title: string): ReactNode {
-        if (typeof data === 'undefined' || data.length === 0) {
+    renderChart(data: Array<XySeries>, labels: Array<string>, title: string): ReactNode {
+        if (typeof data === 'undefined' || data.length !== 1) {
             return <div>No data</div> //fixme
         }
-        // todo data depending on displayed table??
+        const series = data[0];
+        // make data depend on displayed table
+        const filteredLabels = series.labels.filter(l => labels.includes(l));
+        const filteredDatasets = series.datasets.filter(d => labels.includes(d.label));
+
         // todo format displayed time depending on selected time range
-        return (<Line data={data}
-                      legend={{position: 'bottom', fullWidth: false}}
+        series.labels = series.labels.map(l => new Date(l * 1000));
+
+        const res = {labels: filteredLabels, datasets: filteredDatasets};
+
+        return (<Line data={res}
+                      legend={{position: 'bottom'}}
                       options={{
                           title: {
                               display: true,
                               text: title
                           },
+                          // scales: {
+                          //     xAxes: [{
+                          //         type: 'time',
+                          //     }]
+                          // },
                           maintainAspectRatio: false,
                           plugins: {
                               colorschemes: {
@@ -193,13 +219,11 @@ class Queries extends React.Component<Props, {}> {
                 <div className="Element Table">
                     {this.renderTable()}
                 </div>
-                <div className="row">
-                    <div className="Element Chart col">
-                        {this.renderChart(this.props.queries.timeChart, "Time spent on query")}
-                    </div>
-                    <div className="Element Chart col">
-                        {this.renderChart(this.props.queries.callsChart, "Query calls")}
-                    </div>
+                <div className="Element Chart">
+                    {this.renderChart(this.props.queries.timeChart, this.props.queries.displayed, "Time spent on query")}
+                </div>
+                <div className="Element Chart">
+                    {this.renderChart(this.props.queries.callsChart, this.props.queries.displayed, "Query calls")}
                 </div>
             </div>
         );
@@ -216,5 +240,5 @@ function mapStateToProps(state: AppState): StateFromProps {
 
 export default connect<StateFromProps, DispatchFromProps, {}, AppState>(
     mapStateToProps,
-    {setQueriesTable, setQueriesTimeChart, setQueriesCallsChart}
+    {setQueriesTable, setQueriesDisplayed, setQueriesTimeChart, setQueriesCallsChart}
 )(Queries);
