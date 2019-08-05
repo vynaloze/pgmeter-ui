@@ -1,0 +1,47 @@
+.StyledSelect {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.StyledSelect .info-box {
+    height: 100%;
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: var(--bg-general);
+    border: none;
+    border-radius: 10px;
+    color: var(--text);
+    padding: 0 20px;
+    z-index: 1;
+    font-size-adjust: 0.6;
+}
+
+.StyledSelect .select-box {
+    right: 0 !important;
+    top: 60px !important;
+    width: 680px !important;
+    z-index: 3000 !important;
+    position: absolute !important;
+}
+
+.StyledSelect .kn-multi_select__wrapper___30BEc, .kn-selection_status__status___1qxE9, .kn-search__input___2tyxf, ::placeholder {
+    color: var(--text);
+    background: var(--bg-header);
+    caret-color: var(--text);
+    border: 1px solid var(--bg-header);
+}
+
+.StyledSelect .kn-item__item___kQ2Ll:hover, .kn-item__selected___3tRL6, .kn-selected_item__selected_item___1uiiv:hover {
+    color: var(--blue);
+    background-color: var(--bg-general);
+}
+
+.StyledSelect .jss28 {
+    fill: var(--blue)
+}
+
+.StyledSelect .kn-column__column___3Iwzx {
+    border-right: 1px solid var(--bg-header);
+}
