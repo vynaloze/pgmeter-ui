@@ -6,10 +6,10 @@ export function FormatTime(start: Moment, end: Moment, value: Moment): string {
     } else if (end.diff(start, "days") < 1) {
         return value.format("HH:mm")
     } else if (end.diff(start, "weeks") < 1) {
-        return value.format("DD/MM HH:mm")
+        return value.format("DD-MM HH:mm")
     } else if (end.diff(start, "months") < 1) {
-        return value.format("DD/MM")
+        return value.format("DD-MM")
     } else {
-        return value.format("MM/YY")
+        return value.format("MM-YYYY")
     }
 }

@@ -15,12 +15,17 @@ import {
 } from '../_store/stats/queries/actions';
 import {QueriesState, QueriesTablePayload} from "../_store/stats/queries/types";
 import {XySeries} from "../_store/stats/types";
-import {Line} from 'react-chartjs-2';
+import {defaults, Line} from 'react-chartjs-2';
 import TranslateRequest from "../ApiClient/body";
 import 'chartjs-plugin-colorschemes';
 import * as moment from "moment";
 import * as TimeUtils from "./TimeUtils";
 import {setMaxSelectedDatasources} from '../_store/datasources/actions';
+// @ts-ignore
+defaults.global.defaultFontColor = '#dee5ec';
+// @ts-ignore
+defaults.global.defaultFontFamily = 'Fira Mono';
+
 
 interface StateFromProps {
     timeRange: TimeRangeState
@@ -38,9 +43,16 @@ interface DispatchFromProps {
 
 type Props = StateFromProps & DispatchFromProps
 
-class Queries extends React.Component<Props, {}> {
+interface InternalState {
+    error: string | null
+}
+
+class Queries extends React.Component<Props, InternalState> {
     constructor(props: Props) {
         super(props);
+        this.state = {
+            error: null
+        };
         this.renderTable = this.renderTable.bind(this);
         this.renderChart = this.renderChart.bind(this);
     }
@@ -64,8 +76,11 @@ class Queries extends React.Component<Props, {}> {
     fetchData() {
         // table
         ApiClient.getRecentStats("pg_stat_statements",
-            (response => this.props.setQueriesTable(response)),
-            (error => alert(error)));// fixme error handling
+            (response => {
+                this.props.setQueriesTable(response);
+                this.setState({error: null})
+            }),
+            (error => this.setState({error: "Error fetching table data: " + error.toString()})));
 
         // time chart
         const timeChartRequest = {
@@ -91,8 +106,11 @@ class Queries extends React.Component<Props, {}> {
             }
         } as TranslateRequest;
         ApiClient.getXyStats(timeChartRequest,
-            (response => this.props.setQueriesTimeChart(Array(response))),
-            (error => alert(error))); // fixme error handling
+            (response => {
+                this.props.setQueriesTimeChart(Array(response));
+                this.setState({error: null})
+            }),
+            (error => this.setState({error: "Error fetching time chart data: " + error.toString()})));
 
         // calls chart
         const callsChartRequest = {
@@ -118,8 +136,11 @@ class Queries extends React.Component<Props, {}> {
             }
         } as TranslateRequest;
         ApiClient.getXyStats(callsChartRequest,
-            (response => this.props.setQueriesCallsChart(Array(response))),
-            (error => alert(error))); // fixme error handling
+            (response => {
+                this.props.setQueriesCallsChart(Array(response));
+                this.setState({error: null})
+            }),
+            (error => this.setState({error: "Error fetching calls chart data: " + error.toString()})));
     }
 
     renderTable(): ReactNode {
@@ -176,7 +197,7 @@ class Queries extends React.Component<Props, {}> {
             defaultPageSize={10}>
             {(tableState, makeTable, instance) => {
                 const displayedQueries = tableState.sortedData.slice(tableState.startRow, tableState.endRow).map(x => x.query);
-                if (this.props.queries.displayed.toString() !== displayedQueries.toString()) { //fixme why it is re-rendered so many times?
+                if (this.props.queries.displayed.toString() !== displayedQueries.toString()) {
                     this.props.setQueriesDisplayed(displayedQueries);
                 }
                 return makeTable()
@@ -184,9 +205,9 @@ class Queries extends React.Component<Props, {}> {
         </ReactTable>
     }
 
-    renderChart(data: Array<XySeries>, series: Array<string>, title: string): ReactNode {
+    renderChart(data: Array<XySeries>, series: Array<string>, title: string, yAxis: string | null): ReactNode {
         if (typeof data === 'undefined' || data.length !== 1) {
-            return <div>No data</div> //fixme
+            return <div>No data</div>
         }
         const actualData = data[0];
 
@@ -198,21 +219,25 @@ class Queries extends React.Component<Props, {}> {
         const mappedLabels = sortedLabels.map(l => TimeUtils.FormatTime(moment.unix(sortedLabels[0]),
             moment.unix(sortedLabels[sortedLabels.length - 1]), moment.unix(l)));
 
-        console.log(mappedLabels);
-
         return (<Line data={{labels: mappedLabels, datasets: filteredDatasets}}
                       legend={{position: 'bottom'}}
                       options={{
                           title: {
                               display: true,
-                              text: title
+                              text: title,
+                              fontStyle: 'normal'
+                          },
+                          scales: {
+                              yAxes: [{
+                                  scaleLabel: {
+                                      display: yAxis !== null,
+                                      labelString: yAxis
+                                  }
+                              }]
                           },
                           maintainAspectRatio: false,
                           plugins: {
                               colorschemes: {
-                                  // scheme: 'brewer.Paired12'
-                                  // scheme: 'tableau.HueCircle19'
-                                  // scheme: 'brewer.SetOne9'
                                   scheme: 'brewer.DarkTwo8'
                               }
                           }
@@ -222,14 +247,15 @@ class Queries extends React.Component<Props, {}> {
     render() {
         return (
             <div className="Content container-fluid">
+                {this.state.error != null ? <div className="Element Error">{this.state.error}</div> : null}
                 <div className="Element Table">
                     {this.renderTable()}
                 </div>
                 <div className="Element Chart">
-                    {this.renderChart(this.props.queries.timeChart, this.props.queries.displayed, "Time spent on query")}
+                    {this.renderChart(this.props.queries.timeChart, this.props.queries.displayed, "Average time spent on query", "ms")}
                 </div>
                 <div className="Element Chart">
-                    {this.renderChart(this.props.queries.callsChart, this.props.queries.displayed, "Query calls")}
+                    {this.renderChart(this.props.queries.callsChart, this.props.queries.displayed, "Query calls", null)}
                 </div>
             </div>
         );
