@@ -103,3 +103,18 @@
     top: 0px;
     bottom: 0px;
 }
+
+/*        */
+/* PICKER */
+/*        */
+
+.Content .Picker {
+    height: 50px;
+    width: 680px;
+    margin: 10px;
+}
+
+.Content .Picker .info-box {
+    width: 100%;
+    background: var(--bg-header);
+}

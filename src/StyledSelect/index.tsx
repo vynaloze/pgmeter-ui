@@ -9,12 +9,11 @@ import './index.css'
 interface Props {
     all: Array<any>
     selected: Array<any>
+    placeholder: string
     maxSelected: number
     loading: boolean
 
     handleChange(a: any): void
-
-    selectedAccessor(a: any): any
 }
 
 interface InternalState {
@@ -22,6 +21,16 @@ interface InternalState {
 }
 
 class StyledSelect extends React.Component<Props, InternalState> {
+    public static defaultProps: Props = {
+        all: [],
+        selected: [],
+        placeholder: "",
+        maxSelected: 1,
+        loading: false,
+        handleChange(a: any): void {
+        }
+    };
+
     constructor(props: any) {
         super(props);
         this.state = {
@@ -45,7 +54,8 @@ class StyledSelect extends React.Component<Props, InternalState> {
 
     render() {
         return <div className="StyledSelect horizontal">
-            <input value={this.props.selected.map(this.props.selectedAccessor)}
+            <input value={this.props.selected.map((a: any) => a.label)}
+                   placeholder={this.props.placeholder}
                    type="text" className="info-box" readOnly={true} onClick={this.toggleSelectBox}/>
             <div className="select-box">
                 {this.state.selectBoxOpen ?

@@ -100,10 +100,10 @@ class Datasources extends React.Component<Props, InternalState> {
             <StyledSelect
                 all={this.state.all}
                 selected={this.state.selected}
+                placeholder={"Pick datasources..."}
                 maxSelected={this.props.maxSelected}
                 loading={this.state.loading}
                 handleChange={this.handleChange}
-                selectedAccessor={((s: InternalDatasource) => s.label)}
             />
         </div>
     }

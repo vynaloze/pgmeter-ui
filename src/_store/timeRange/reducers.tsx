@@ -2,7 +2,7 @@ import moment from "moment";
 import {SET_TIME_RANGE, TimeRangeActions, TimeRangeState} from "./types";
 
 const initialTimeRange: TimeRangeState = {
-    start: moment().subtract(1, "hour"),
+    start: moment().subtract(90, "day"),
     end: moment(),
 };
 
