@@ -205,7 +205,7 @@ class Queries extends React.Component<Props, InternalState> {
         </ReactTable>
     }
 
-    renderChart(data: Array<XySeries>, series: Array<string>, title: string, yAxis: string | null): ReactNode {
+    renderChart(data: Array<XySeries>, series: Array<string>, title: string, yAxis?: string): ReactNode {
         if (typeof data === 'undefined' || data.length !== 1) {
             return <div>No data</div>
         }
@@ -230,7 +230,7 @@ class Queries extends React.Component<Props, InternalState> {
                           scales: {
                               yAxes: [{
                                   scaleLabel: {
-                                      display: yAxis !== null,
+                                      display: yAxis !== undefined,
                                       labelString: yAxis
                                   }
                               }]
@@ -255,7 +255,7 @@ class Queries extends React.Component<Props, InternalState> {
                     {this.renderChart(this.props.queries.timeChart, this.props.queries.displayed, "Average time spent on query", "ms")}
                 </div>
                 <div className="Element Chart">
-                    {this.renderChart(this.props.queries.callsChart, this.props.queries.displayed, "Query calls", null)}
+                    {this.renderChart(this.props.queries.callsChart, this.props.queries.displayed, "Query calls")}
                 </div>
             </div>
         );

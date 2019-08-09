@@ -33,6 +33,10 @@ class Page1 extends React.Component<Props, {}> {
     }
 
     render() {
+        // TODO - MAJOR TODOs
+        // 1. autoupdate data somehow (SSE or periodic pulls)
+        // 2. shareable links - save time range, datasources, tables etc in URL
+        // 3. alerting
         return (
             <div className="Content">
                 Page1

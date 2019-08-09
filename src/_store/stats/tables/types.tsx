@@ -3,7 +3,7 @@ import {XySeries} from "../types";
 export interface TablesState {
     all: Array<Table>
     displayed: Array<Table>
-    tableData: TablesData
+    tablesData: TablesData
 }
 
 export interface Table {
@@ -12,40 +12,56 @@ export interface Table {
 }
 
 export interface TablesData {
-    entries: Entries
-    events: Events
+    overview: Array<TablesTablePayload>
+    charts: TablesXyPayload
 }
 
-export interface Entries {
-    seq_scan: Entry
-    seq_tup_fetch: Entry
-    idx_scan: Entry
-    idx_tup_fetch: Entry
-    live_tup: Entry
-    dead_tup: Entry
-    ins_tup: Entry
-    upd_tup: Entry
-    del_tup: Entry
-    // cacheHits: Entry
-    // indexHits: Entry
-    // toastCacheHits: Entry
-    // toastIndexHits: Entry
-    vacuum_count: Entry
-    autovacuum_count: Entry
-    analyze_count: Entry
-    autoanalyze_count: Entry
+export interface TablesTablePayload {
+    table: string
+    seq_scan: number
+    seq_tup_fetch: number
+    idx_scan: number
+    idx_tup_fetch: number
+    live_tup: number
+    dead_tup: number
+    ins_tup: number
+    upd_tup: number
+    del_tup: number
+    last_vacuum: Date
+    last_autovacuum: Date
+    last_analyze: Date
+    last_autoanalyze: Date
+    vacuum_count: number
+    autovacuum_count: number
+    analyze_count: number
+    autoanalyze_count: number
 }
 
-export interface Entry {
-    last?: number
-    chartData?: XySeries
-}
+// todo IO stats
+// cacheHits: number
+// indexHits: number
+// toastCacheHits: number
+// toastIndexHits: number
 
-export interface Events {
-    last_vacuum?: Date
-    last_autovacuum?: Date
-    last_analyze?: Date
-    last_autoanalyze?: Date
+export interface TablesXyPayload {
+    seq_scan?: XySeries
+    seq_tup_fetch?: XySeries
+    idx_scan?: XySeries
+    idx_tup_fetch?: XySeries
+    live_tup?: XySeries
+    dead_tup?: XySeries
+    ins_tup?: XySeries
+    upd_tup?: XySeries
+    del_tup?: XySeries
+    // todo IO stats
+    // cacheHits?: XySeries
+    // indexHits?: XySeries
+    // toastCacheHits?: XySeries
+    // toastIndexHits?: XySeries
+    vacuum_count?: XySeries
+    autovacuum_count?: XySeries
+    analyze_count?: XySeries
+    autoanalyze_count?: XySeries
 }
 
 export const SET_ALL_TABLES = 'SET_ALL_TABLES';

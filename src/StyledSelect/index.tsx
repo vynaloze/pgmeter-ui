@@ -31,7 +31,7 @@ class StyledSelect extends React.Component<Props, InternalState> {
         }
     };
 
-    constructor(props: any) {
+    constructor(props: Props) {
         super(props);
         this.state = {
             selectBoxOpen: false

@@ -1,0 +1,13 @@
+.table {
+    margin: auto;
+    width: 75% !important;
+    background: var(--bg-chart) !important;
+    color: var(--text) !important;
+    border-radius: 10px;
+    box-shadow: 0px 0px 1px 1px var(--dark-blue);
+    transition: all 0.3s ease;
+}
+
+.table th {
+    text-align: right;
+}

@@ -3,27 +3,9 @@ import {SET_ALL_TABLES, SET_DISPLAYED_TABLES, SET_TABLES_DATA, TablesActions, Ta
 const initialState: TablesState = {
     all: [],
     displayed: [],
-    tableData: {
-        entries: {
-            seq_scan: {},
-            seq_tup_fetch: {},
-            idx_scan: {},
-            idx_tup_fetch: {},
-            live_tup: {},
-            dead_tup: {},
-            ins_tup: {},
-            upd_tup: {},
-            del_tup: {},
-            // cacheHits: {}
-            // indexHits: {}
-            // toastCacheHits: {}
-            // toastIndexHits: {}
-            vacuum_count: {},
-            autovacuum_count: {},
-            analyze_count: {},
-            autoanalyze_count: {},
-        },
-        events: {}
+    tablesData: {
+        overview: [],
+        charts: {},
     },
 };
 
@@ -33,19 +15,19 @@ export function tablesReducer(state = initialState, action: TablesActions): Tabl
             return {
                 all: action.payload,
                 displayed: state.displayed,
-                tableData: state.tableData,
+                tablesData: state.tablesData,
             };
         case SET_DISPLAYED_TABLES:
             return {
                 all: state.all,
                 displayed: action.payload,
-                tableData: state.tableData,
+                tablesData: state.tablesData,
             };
         case SET_TABLES_DATA:
             return {
                 all: state.all,
                 displayed: state.displayed,
-                tableData: action.payload,
+                tablesData: action.payload,
             };
         default:
             return state
