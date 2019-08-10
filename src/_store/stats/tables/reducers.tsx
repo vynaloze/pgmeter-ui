@@ -3,7 +3,7 @@ import {SET_ALL_TABLES, SET_DISPLAYED_TABLES, SET_TABLES_DATA, TablesActions, Ta
 const initialState: TablesState = {
     all: [],
     displayed: [],
-    tablesData: {
+    data: {
         overview: [],
         charts: {},
     },
@@ -15,19 +15,19 @@ export function tablesReducer(state = initialState, action: TablesActions): Tabl
             return {
                 all: action.payload,
                 displayed: state.displayed,
-                tablesData: state.tablesData,
+                data: state.data,
             };
         case SET_DISPLAYED_TABLES:
             return {
                 all: state.all,
                 displayed: action.payload,
-                tablesData: state.tablesData,
+                data: state.data,
             };
         case SET_TABLES_DATA:
             return {
                 all: state.all,
                 displayed: state.displayed,
-                tablesData: action.payload,
+                data: action.payload,
             };
         default:
             return state

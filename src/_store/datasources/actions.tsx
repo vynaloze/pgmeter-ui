@@ -1,9 +1,11 @@
 import {
+    BackendDatasource,
     Datasource,
     DatasourceActions,
+    SET_BACKEND_DATASOURCES,
     SET_DATASOURCE_LABEL,
     SET_DATASOURCES,
-    SET_MAX_SELECTED_DATASOURCES,
+    SET_SELECTED_BACKEND_DATASOURCES,
     SET_SELECTED_DATASOURCES
 } from "./types";
 
@@ -17,9 +19,14 @@ export const setSelectedDatasources = (selected: Array<Datasource>): DatasourceA
     payload: selected
 });
 
-export const setMaxSelectedDatasources = (max: number): DatasourceActions => ({
-    type: SET_MAX_SELECTED_DATASOURCES,
-    payload: max
+export const setBackendDatasources = (datasources: Array<BackendDatasource>): DatasourceActions => ({
+    type: SET_BACKEND_DATASOURCES,
+    payload: datasources
+});
+
+export const setSelectedBackendDatasources = (selected: Array<BackendDatasource>): DatasourceActions => ({
+    type: SET_SELECTED_BACKEND_DATASOURCES,
+    payload: selected
 });
 
 export const setDatasourceLabel = (label: string): DatasourceActions => ({

@@ -10,7 +10,6 @@ interface Props {
     all: Array<any>
     selected: Array<any>
     placeholder: string
-    maxSelected: number
     loading: boolean
 
     handleChange(a: any): void
@@ -25,7 +24,6 @@ class StyledSelect extends React.Component<Props, InternalState> {
         all: [],
         selected: [],
         placeholder: "",
-        maxSelected: 1,
         loading: false,
         handleChange(a: any): void {
         }
@@ -64,7 +62,6 @@ class StyledSelect extends React.Component<Props, InternalState> {
                         selectedItems={this.props.selected}
                         onChange={this.props.handleChange}
                         loading={this.props.loading}
-                        maxSelectedItems={this.props.maxSelected}
                     /> : null}
             </div>
         </div>

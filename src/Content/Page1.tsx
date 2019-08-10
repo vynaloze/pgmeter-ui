@@ -49,6 +49,10 @@ class Page1 extends React.Component<Props, {}> {
                 <div>{JSON.stringify(this.props.datasources.selected)}</div>
                 All datasources:
                 <div>{JSON.stringify(this.props.datasources.all)}</div>
+                Selected backend:
+                <div>{JSON.stringify(this.props.datasources.selectedBackend)}</div>
+                All backend datasources:
+                <div>{JSON.stringify(this.props.datasources.allBackend)}</div>
             </div>
         );
     }

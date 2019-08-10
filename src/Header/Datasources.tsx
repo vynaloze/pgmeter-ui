@@ -1,25 +1,28 @@
 import React from "react";
 import {connect} from "react-redux";
-import {Moment} from "moment";
-import {Datasource} from "../_store/datasources/types";
-import {setDatasources, setSelectedDatasources} from "../_store/datasources/actions";
+import {BackendDatasource, Datasource, DatasourceState} from "../_store/datasources/types";
+import {
+    setBackendDatasources,
+    setDatasources,
+    setSelectedBackendDatasources,
+    setSelectedDatasources
+} from "../_store/datasources/actions";
 import {AppState} from "../_store";
 import './Datasources.css'
 import ApiClient from "../ApiClient";
 import StyledSelect from "../StyledSelect";
+import {TimeRangeState} from "../_store/timeRange/types";
 
 interface StateFromProps {
-    all: Array<Datasource>
-    selected: Array<Datasource>
-    maxSelected: number
-    start: Moment
-    end: Moment
-    labelTemplate: string
+    timeRange: TimeRangeState
+    datasources: DatasourceState
 }
 
 interface DispatchFromProps {
     setDatasources: typeof setDatasources
     setSelectedDatasources: typeof setSelectedDatasources
+    setBackendDatasources: typeof setBackendDatasources
+    setSelectedBackendDatasources: typeof setSelectedBackendDatasources
 }
 
 type Props = StateFromProps & DispatchFromProps
@@ -27,14 +30,6 @@ type Props = StateFromProps & DispatchFromProps
 interface InternalState {
     error: any
     loading: boolean
-    all: Array<InternalDatasource>
-    selected: Array<InternalDatasource>
-}
-
-interface InternalDatasource {
-    id: number
-    label: string
-    representedBy: Array<Datasource>
 }
 
 class Datasources extends React.Component<Props, InternalState> {
@@ -43,8 +38,6 @@ class Datasources extends React.Component<Props, InternalState> {
         this.state = {
             error: null,
             loading: true,
-            all: toInternalDatasources(props.all, props.labelTemplate),
-            selected: toInternalDatasources(props.selected, props.labelTemplate),
         };
         this.handleChange = this.handleChange.bind(this);
         this.updateDatasources = this.updateDatasources.bind(this);
@@ -55,7 +48,7 @@ class Datasources extends React.Component<Props, InternalState> {
     }
 
     componentDidUpdate(prevProps: Props, prevState: InternalState, snapshot: any) {
-        if (prevProps.start !== this.props.start || prevProps.end !== this.props.end) {
+        if (prevProps.timeRange.start !== this.props.timeRange.start || prevProps.timeRange.end !== this.props.timeRange.end) {
             this.fetchDatasources()
         }
     }
@@ -66,7 +59,7 @@ class Datasources extends React.Component<Props, InternalState> {
             error: null,
         });
 
-        ApiClient.getDatasources(this.props.start, this.props.end,
+        ApiClient.getDatasources(this.props.timeRange.start, this.props.timeRange.end,
             this.updateDatasources,
             (error) => {
                 this.setState({
@@ -77,31 +70,28 @@ class Datasources extends React.Component<Props, InternalState> {
     }
 
     updateDatasources(result: any) {
-        this.props.setDatasources(result);
-        let all = toInternalDatasources(result, this.props.labelTemplate);
-        let oldSelected = this.state.selected.flatMap(s => s.representedBy);
+        this.props.setBackendDatasources(result);
+        let all = toDatasources(result, this.props.datasources.labelTemplate);
+        let oldSelected = this.props.datasources.selected.flatMap(s => s.representedBy);
         let selected = all.filter(ds => ds.representedBy.some(d => oldSelected.includes(d)));
+        this.props.setDatasources(all);
+        this.props.setSelectedDatasources(selected);
         this.setState({
-            loading: false,
-            all: all,
-            selected: selected,
+            loading: false
         });
     }
 
-    handleChange(selected: Array<InternalDatasource>) {
-        this.setState({
-            selected: selected
-        });
-        this.props.setSelectedDatasources(toDatasources(selected));
+    handleChange(selected: Array<Datasource>) {
+        this.props.setSelectedDatasources(selected);
+        this.props.setSelectedBackendDatasources(toBackendDatasources(selected));
     }
 
     render() {
         return <div className="Datasources align-right">
             <StyledSelect
-                all={this.state.all}
-                selected={this.state.selected}
+                all={this.props.datasources.all}
+                selected={this.props.datasources.selected}
                 placeholder={"Pick datasources..."}
-                maxSelected={this.props.maxSelected}
                 loading={this.state.loading}
                 handleChange={this.handleChange}
             />
@@ -109,10 +99,10 @@ class Datasources extends React.Component<Props, InternalState> {
     }
 }
 
-function toInternalDatasources(ds: Array<Datasource>, labelTemplate: string): Array<InternalDatasource> {
+function toDatasources(ds: Array<BackendDatasource>, labelTemplate: string): Array<Datasource> {
     // first group all datasources by IP
     interface GroupedByIp {
-        [ip: string]: Array<Datasource>
+        [ip: string]: Array<BackendDatasource>
     }
 
     let groupedByIp = ds.reduce((res: GroupedByIp, bd) => {
@@ -123,7 +113,7 @@ function toInternalDatasources(ds: Array<Datasource>, labelTemplate: string): Ar
     let groupedArray = Object.values(groupedByIp);
 
     // than join each non-#system datasource with respective #system datasource of that machine
-    let internalDatasources = Array<InternalDatasource>();
+    let internalDatasources = Array<Datasource>();
     for (let i = 0, newIndex = 0; i < groupedArray.length; i++) {
         let group = groupedArray[i];
         let indexOfSystemSource = group.findIndex(ds => ds.database === '#system');
@@ -166,25 +156,21 @@ function replaceLabel(datasource: any, labelTemplate: string): string {
     });
 }
 
-function toDatasources(ids: Array<InternalDatasource>): Array<Datasource> {
-    return ids.reduce((res: Array<Datasource>, id: InternalDatasource) => {
+function toBackendDatasources(ids: Array<Datasource>): Array<BackendDatasource> {
+    return ids.reduce((res: Array<BackendDatasource>, id: Datasource) => {
         res = res.concat(...id.representedBy);
         return res;
-    }, new Array<Datasource>());
+    }, new Array<BackendDatasource>());
 }
 
 function mapStateToProps(state: AppState): StateFromProps {
     return {
-        start: state.timeRange.start,
-        end: state.timeRange.end,
-        all: state.datasources.all,
-        selected: state.datasources.selected,
-        maxSelected: state.datasources.maxSelected,
-        labelTemplate: state.datasources.labelTemplate,
+        timeRange: state.timeRange,
+        datasources: state.datasources,
     }
 }
 
 export default connect<StateFromProps, DispatchFromProps, {}, AppState>(
     mapStateToProps,
-    {setDatasources, setSelectedDatasources}
+    {setDatasources, setSelectedDatasources, setBackendDatasources, setSelectedBackendDatasources}
 )(Datasources);

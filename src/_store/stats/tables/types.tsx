@@ -3,7 +3,7 @@ import {XySeries} from "../types";
 export interface TablesState {
     all: Array<Table>
     displayed: Array<Table>
-    tablesData: TablesData
+    data: TablesData
 }
 
 export interface Table {

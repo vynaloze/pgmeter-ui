@@ -1,11 +1,12 @@
 export interface DatasourceState {
     all: Array<Datasource>
     selected: Array<Datasource>
-    maxSelected: number
+    allBackend: Array<BackendDatasource>
+    selectedBackend: Array<BackendDatasource>
     labelTemplate: string
 }
 
-export interface Datasource {
+export interface BackendDatasource {
     id: number
     ip: string
     hostname?: string
@@ -14,9 +15,16 @@ export interface Datasource {
     tags: JSON
 }
 
+export interface Datasource {
+    id: number
+    label: string
+    representedBy: Array<BackendDatasource>
+}
+
 export const SET_DATASOURCES = 'SET_DATASOURCES';
 export const SET_SELECTED_DATASOURCES = 'SET_SELECTED_DATASOURCES';
-export const SET_MAX_SELECTED_DATASOURCES = 'SET_MAX_SELECTED_DATASOURCES';
+export const SET_BACKEND_DATASOURCES = 'SET_BACKEND_DATASOURCES';
+export const SET_SELECTED_BACKEND_DATASOURCES = 'SET_SELECTED_BACKEND_DATASOURCES';
 export const SET_DATASOURCE_LABEL = 'SET_DATASOURCE_LABEL';
 
 export interface SetDatasources {
@@ -29,9 +37,14 @@ export interface SetSelectedDatasources {
     payload: Array<Datasource>
 }
 
-export interface SetMaxSelectedDatasources {
-    type: typeof SET_MAX_SELECTED_DATASOURCES,
-    payload: number
+export interface SetBackendDatasources {
+    type: typeof SET_BACKEND_DATASOURCES,
+    payload: Array<BackendDatasource>
+}
+
+export interface SetSelectedBackendDatasources {
+    type: typeof SET_SELECTED_BACKEND_DATASOURCES,
+    payload: Array<BackendDatasource>
 }
 
 export interface SetDatasourceLabel {
@@ -39,4 +52,9 @@ export interface SetDatasourceLabel {
     payload: string
 }
 
-export type DatasourceActions = SetDatasources | SetSelectedDatasources | SetMaxSelectedDatasources | SetDatasourceLabel
+export type DatasourceActions =
+    SetDatasources
+    | SetSelectedDatasources
+    | SetBackendDatasources
+    | SetSelectedBackendDatasources
+    | SetDatasourceLabel

@@ -5,7 +5,6 @@ import {TimeRangeState} from "../_store/timeRange/types";
 import {DatasourceState} from "../_store/datasources/types";
 import {Table, TablesState, TablesTablePayload} from "../_store/stats/tables/types";
 import {setAllTables, setDisplayedTables, setTablesData} from '../_store/stats/tables/actions';
-import {setMaxSelectedDatasources} from "../_store/datasources/actions";
 import ApiClient from "../ApiClient";
 import {AppState} from "../_store";
 import {connect} from "react-redux";
@@ -24,9 +23,8 @@ interface StateFromProps {
 
 interface DispatchFromProps {
     setAllTables: typeof setAllTables
-    setDisplayedTable: typeof setDisplayedTables
-    setTableData: typeof setTablesData
-    setMaxSelectedDatasources: typeof setMaxSelectedDatasources
+    setDisplayedTables: typeof setDisplayedTables
+    setTablesData: typeof setTablesData
 }
 
 type Props = StateFromProps & DispatchFromProps
@@ -47,7 +45,6 @@ class Tables extends React.Component<Props, InternalState> {
     }
 
     componentDidMount(): void {
-        this.props.setMaxSelectedDatasources(1);
         if (this.props.datasources.selected.length > 0) {
             this.fetchTables()
         }
@@ -90,9 +87,9 @@ class Tables extends React.Component<Props, InternalState> {
                     .filter(((r: any) => this.props.datasources.selected.map((ds => ds.id)).includes(r.datasource.id)))
                     .flatMap((r: any) => r.payload)
                     .forEach((p: any) => overview.push(p));
-                let data = this.props.tables.tablesData;
+                let data = this.props.tables.data;
                 data.overview = overview;
-                this.props.setTableData(data);
+                this.props.setTablesData(data);
                 this.setState({error: null})
             }),
             (error => this.setState({error: "Error fetching data: " + error.toString()})));
@@ -124,12 +121,12 @@ class Tables extends React.Component<Props, InternalState> {
                     }
                 }
             } as TranslateRequest;
-            let data = this.props.tables.tablesData;
+            let data = this.props.tables.data;
             ApiClient.getXyStats(req,
                 (response => {
                     // @ts-ignore
                     data.charts[k] = response;
-                    this.props.setTableData(data);
+                    this.props.setTablesData(data);
                     this.setState({error: null})
                 }),
                 (error => this.setState({error: "Error fetching data: " + error.toString()})));
@@ -137,7 +134,7 @@ class Tables extends React.Component<Props, InternalState> {
     }
 
     handleTableSelection(selected: Array<Table>) {
-        this.props.setDisplayedTable(selected);
+        this.props.setDisplayedTables(selected);
     }
 
     renderChart(data: XySeries | undefined, title: string, colorIndex: number, yAxis?: string): ReactNode {
@@ -182,7 +179,7 @@ class Tables extends React.Component<Props, InternalState> {
     }
 
     render() {
-        const t = this.props.tables.tablesData.overview
+        const t = this.props.tables.data.overview
             .filter((o) => this.props.tables.displayed.map((t => t.label)).includes(o.table))[0]; //fixme - decide if support multiple tables or not
         const tableData: any = t === undefined ?
             {
@@ -239,54 +236,54 @@ class Tables extends React.Component<Props, InternalState> {
                 <div className="container-fluid">
                     <div className="row">
                         <div className="Element Chart col">
-                            {this.renderChart(this.props.tables.tablesData.charts.seq_scan, "Sequential Scans", 0)}
+                            {this.renderChart(this.props.tables.data.charts.seq_scan, "Sequential Scans", 0)}
                         </div>
                         <div className="Element Chart col">
-                            {this.renderChart(this.props.tables.tablesData.charts.seq_tup_fetch, "Sequential Scans - Rows Fetched", 0)}
-                        </div>
-                    </div>
-                    <div className="row">
-                        <div className="Element Chart col">
-                            {this.renderChart(this.props.tables.tablesData.charts.idx_scan, "Index Scans", 1)}
-                        </div>
-                        <div className="Element Chart col">
-                            {this.renderChart(this.props.tables.tablesData.charts.idx_tup_fetch, "Index Scans - Rows Fetched", 1)}
+                            {this.renderChart(this.props.tables.data.charts.seq_tup_fetch, "Sequential Scans - Rows Fetched", 0)}
                         </div>
                     </div>
                     <div className="row">
                         <div className="Element Chart col">
-                            {this.renderChart(this.props.tables.tablesData.charts.live_tup, "Live Rows", 2)}
+                            {this.renderChart(this.props.tables.data.charts.idx_scan, "Index Scans", 1)}
                         </div>
                         <div className="Element Chart col">
-                            {this.renderChart(this.props.tables.tablesData.charts.dead_tup, "Dead Rows", 2)}
+                            {this.renderChart(this.props.tables.data.charts.idx_tup_fetch, "Index Scans - Rows Fetched", 1)}
+                        </div>
+                    </div>
+                    <div className="row">
+                        <div className="Element Chart col">
+                            {this.renderChart(this.props.tables.data.charts.live_tup, "Live Rows", 2)}
+                        </div>
+                        <div className="Element Chart col">
+                            {this.renderChart(this.props.tables.data.charts.dead_tup, "Dead Rows", 2)}
                         </div>
                     </div>
                     <div className="row no-gutters">
                         <div className="Element Chart col" style={{maxWidth: '32%'}}>
-                            {this.renderChart(this.props.tables.tablesData.charts.ins_tup, "Inserted Rows", 3)}
+                            {this.renderChart(this.props.tables.data.charts.ins_tup, "Inserted Rows", 3)}
                         </div>
                         <div className="Element Chart col" style={{maxWidth: '32%'}}>
-                            {this.renderChart(this.props.tables.tablesData.charts.upd_tup, "Updated Rows", 3)}
+                            {this.renderChart(this.props.tables.data.charts.upd_tup, "Updated Rows", 3)}
                         </div>
                         <div className="Element Chart col" style={{maxWidth: '32%'}}>
-                            {this.renderChart(this.props.tables.tablesData.charts.dead_tup, "Deleted Rows", 3)}
+                            {this.renderChart(this.props.tables.data.charts.dead_tup, "Deleted Rows", 3)}
                         </div>
                     </div>
                     {/* TODO cache hits % */}
                     <div className="row">
                         <div className="Element Chart col">
-                            {this.renderChart(this.props.tables.tablesData.charts.vacuum_count, "Vacuums", 4)}
+                            {this.renderChart(this.props.tables.data.charts.vacuum_count, "Vacuums", 4)}
                         </div>
                         <div className="Element Chart col">
-                            {this.renderChart(this.props.tables.tablesData.charts.autovacuum_count, "Autovacuums", 4)}
+                            {this.renderChart(this.props.tables.data.charts.autovacuum_count, "Autovacuums", 4)}
                         </div>
                     </div>
                     <div className="row">
                         <div className="Element Chart col">
-                            {this.renderChart(this.props.tables.tablesData.charts.analyze_count, "Analyzes", 5)}
+                            {this.renderChart(this.props.tables.data.charts.analyze_count, "Analyzes", 5)}
                         </div>
                         <div className="Element Chart col">
-                            {this.renderChart(this.props.tables.tablesData.charts.autoanalyze_count, "Autoanalyzes", 5)}
+                            {this.renderChart(this.props.tables.data.charts.autoanalyze_count, "Autoanalyzes", 5)}
                         </div>
                     </div>
                 </div>
@@ -305,5 +302,5 @@ function mapStateToProps(state: AppState): StateFromProps {
 
 export default connect<StateFromProps, DispatchFromProps, {}, AppState>(
     mapStateToProps,
-    {setAllTables, setDisplayedTable: setDisplayedTables, setTableData: setTablesData, setMaxSelectedDatasources}
+    {setAllTables, setDisplayedTables, setTablesData}
 )(Tables);
