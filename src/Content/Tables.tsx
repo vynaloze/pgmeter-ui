@@ -12,7 +12,7 @@ import TranslateRequest from "../ApiClient/body";
 import VerticalTable from "../VerticalTable";
 import moment from "moment"
 import {XySeries} from "../_store/stats/types";
-import * as TimeUtils from "./TimeUtils";
+import * as TimeUtils from "./Utils";
 import {Line} from "react-chartjs-2";
 
 interface StateFromProps {
@@ -63,11 +63,9 @@ class Tables extends React.Component<Props, InternalState> {
         ApiClient.getRecentStats("pg_stat_user_tables",
             (response => {
                 const tables: Array<Table> = response
-                    .filter(((r: any) => this.props.datasources.selected.map((ds => ds.id)).includes(r.datasource.id)))
+                    .filter(((r: any) => this.props.datasources.selectedBackend.map((ds => ds.id)).includes(r.datasource.id)))
                     .flatMap((r: any) => r.payload)
-                    .map((p: any, index: number) => {
-                        return {id: index, label: p.table}
-                    });
+                    .map((p: any, index: number) => ({id: index, label: p.table}));
                 this.props.setAllTables(tables);
                 this.setState({error: null, loading: false})
             }),
@@ -84,7 +82,7 @@ class Tables extends React.Component<Props, InternalState> {
             (response => {
                 let overview: Array<TablesTablePayload> = [];
                 response
-                    .filter(((r: any) => this.props.datasources.selected.map((ds => ds.id)).includes(r.datasource.id)))
+                    .filter(((r: any) => this.props.datasources.selectedBackend.map((ds => ds.id)).includes(r.datasource.id)))
                     .flatMap((r: any) => r.payload)
                     .forEach((p: any) => overview.push(p));
                 let data = this.props.tables.data;
@@ -104,7 +102,7 @@ class Tables extends React.Component<Props, InternalState> {
                     timestampFrom: this.props.timeRange.start.unix(),
                     timestampTo: this.props.timeRange.end.unix(),
                     type: "pg_stat_user_tables",
-                    datasourceIds: this.props.datasources.selected.map(d => d.id)
+                    datasourceIds: this.props.datasources.selectedBackend.map(d => d.id)
                 },
                 params: {
                     x: {
@@ -115,10 +113,10 @@ class Tables extends React.Component<Props, InternalState> {
                         name: k,
                         type: "key"
                     },
-                    dimension: {
+                    dimension: [{
                         name: "table",
                         type: "key"
-                    }
+                    }]
                 }
             } as TranslateRequest;
             let data = this.props.tables.data;

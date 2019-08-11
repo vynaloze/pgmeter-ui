@@ -2,12 +2,13 @@ import {Table, XySeries} from "../types";
 
 export interface QueriesState {
     table: Array<QueriesTable>
-    displayed: Array<string>
+    displayed: Array<QueriesTableRow>
     timeChart: Array<XySeries>
     callsChart: Array<XySeries>
 }
 
 export interface QueriesTable extends Table {
+    datasourceId: number
     payload: Array<QueriesTablePayload>
 }
 
@@ -25,6 +26,10 @@ export interface QueriesTablePayload {
     local_blks_read: number
 }
 
+export interface QueriesTableRow extends QueriesTablePayload {
+    datasourceId: number
+}
+
 export const SET_QUERIES_TABLE = 'SET_QUERIES_TABLE';
 export const SET_QUERIES_DISPLAYED = 'SET_QUERIES_DISPLAYED';
 export const SET_QUERIES_TIME_CHART = 'SET_QUERIES_TIME_CHART';
@@ -37,7 +42,7 @@ export interface SetQueriesTable {
 
 export interface SetQueriesDisplayed {
     type: typeof SET_QUERIES_DISPLAYED,
-    payload: Array<string>
+    payload: Array<QueriesTableRow>
 }
 
 export interface SetQueriesTimeChart {

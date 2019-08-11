@@ -12,7 +12,7 @@ export interface Filter {
 export interface Params {
     x: Param
     y: Param
-    dimension: Param
+    dimension: Array<Param>
 }
 
 export interface Param {
@@ -24,5 +24,4 @@ export enum ParamType {
     TIMESTAMP = "timestamp",
     DATASOURCE = "datasource",
     KEY = "key",
-    COMPOSITE_KEY = "composite_key"
 }

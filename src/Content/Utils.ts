@@ -1,4 +1,5 @@
 import {Moment} from "moment";
+import {Datasource} from "../_store/datasources/types";
 
 export function FormatTime(start: Moment, end: Moment, value: Moment): string {
     if (end.diff(start, "minutes") < 15) {
@@ -12,4 +13,10 @@ export function FormatTime(start: Moment, end: Moment, value: Moment): string {
     } else {
         return value.format("MM-YYYY")
     }
+}
+
+export function GetLabelFromBackendDatasource(id: number, datasources: Array<Datasource>): string {
+    const datasource = datasources.find(d => d.representedBy.map(bd => bd.id).includes(id));
+    if (datasource !== undefined) return datasource.label;
+    return "";
 }

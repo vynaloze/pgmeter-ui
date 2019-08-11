@@ -13,13 +13,13 @@ import {
     setQueriesTable,
     setQueriesTimeChart
 } from '../_store/stats/queries/actions';
-import {QueriesState, QueriesTablePayload} from "../_store/stats/queries/types";
+import {QueriesState, QueriesTable, QueriesTableRow} from "../_store/stats/queries/types";
 import {XySeries} from "../_store/stats/types";
 import {defaults, Line} from 'react-chartjs-2';
 import TranslateRequest from "../ApiClient/body";
 import 'chartjs-plugin-colorschemes';
 import * as moment from "moment";
-import * as TimeUtils from "./TimeUtils";
+import * as Utils from "./Utils";
 // @ts-ignore
 defaults.global.defaultFontColor = '#dee5ec';
 // @ts-ignore
@@ -70,7 +70,11 @@ class Queries extends React.Component<Props, InternalState> {
         // table
         ApiClient.getRecentStats("pg_stat_statements",
             (response => {
-                this.props.setQueriesTable(response);
+                const table: Array<QueriesTable> = response.map((r: any) => ({
+                    datasourceId: r.datasource.id,
+                    payload: r.payload
+                }));
+                this.props.setQueriesTable(table);
                 this.setState({error: null})
             }),
             (error => this.setState({error: "Error fetching table data: " + error.toString()})));
@@ -81,7 +85,7 @@ class Queries extends React.Component<Props, InternalState> {
                 timestampFrom: this.props.timeRange.start.unix(),
                 timestampTo: this.props.timeRange.end.unix(),
                 type: "pg_stat_statements",
-                datasourceIds: this.props.datasources.selected.map(d => d.id)
+                datasourceIds: this.props.datasources.selectedBackend.map(d => d.id)
             },
             params: {
                 x: {
@@ -92,10 +96,13 @@ class Queries extends React.Component<Props, InternalState> {
                     name: "avg_time",
                     type: "key"
                 },
-                dimension: {
+                dimension: [{
+                    name: "ds",
+                    type: "datasource"
+                }, {
                     name: "query",
                     type: "key"
-                }
+                }]
             }
         } as TranslateRequest;
         ApiClient.getXyStats(timeChartRequest,
@@ -111,7 +118,7 @@ class Queries extends React.Component<Props, InternalState> {
                 timestampFrom: this.props.timeRange.start.unix(),
                 timestampTo: this.props.timeRange.end.unix(),
                 type: "pg_stat_statements",
-                datasourceIds: this.props.datasources.selected.map(d => d.id)
+                datasourceIds: this.props.datasources.selectedBackend.map(d => d.id)
             },
             params: {
                 x: {
@@ -122,10 +129,13 @@ class Queries extends React.Component<Props, InternalState> {
                     name: "calls",
                     type: "key"
                 },
-                dimension: {
+                dimension: [{
+                    name: "ds",
+                    type: "datasource"
+                }, {
                     name: "query",
                     type: "key"
-                }
+                }]
             }
         } as TranslateRequest;
         ApiClient.getXyStats(callsChartRequest,
@@ -139,6 +149,11 @@ class Queries extends React.Component<Props, InternalState> {
     renderTable(): ReactNode {
         const columns = [
             {
+                id: 'datasourceLabel',
+                Header: 'Datasource',
+                accessor: (d: QueriesTableRow) => Utils.GetLabelFromBackendDatasource(d.datasourceId, this.props.datasources.selected),
+                show: this.props.datasources.selected.length > 1
+            }, {
                 Header: 'Query',
                 accessor: 'query'
             }, {
@@ -151,46 +166,49 @@ class Queries extends React.Component<Props, InternalState> {
                 Header: 'Rows',
                 accessor: 'rows'
             }, {
-                id: 'avg_time',
                 Header: 'Avg Time',
-                accessor: (d: QueriesTablePayload) => d.avg_time.toFixed(2)
+                accessor: 'avg_time',
+                Cell: (props: any) => props.value.toFixed(2)
             }, {
-                id: 'min_time',
                 Header: 'Min Time',
-                accessor: (d: QueriesTablePayload) => d.min_time.toFixed(2)
+                accessor: 'min_time',
+                Cell: (props: any) => props.value.toFixed(2)
             }, {
-                id: 'max_time',
                 Header: 'Max Time',
-                accessor: (d: QueriesTablePayload) => d.max_time.toFixed(2)
+                accessor: 'max_time',
+                Cell: (props: any) => props.value.toFixed(2)
             }, {
                 id: "buffer_hit",
                 Header: 'Buffer Hit %',
-                accessor: (d: QueriesTablePayload) => {
+                accessor: (d: QueriesTableRow) => {
                     let sum = d.shared_blks_hit + d.shared_blks_read;
-                    if (sum === 0) return "0%";
-                    return ((d.shared_blks_hit / sum) * 100).toFixed(2) + "%"
-                }
+                    if (sum === 0) return 0;
+                    return ((d.shared_blks_hit / sum) * 100)
+                },
+                Cell: (props: any) => props.value.toFixed(0) + "%"
             }, {
                 id: "local_buffer_hit",
                 Header: 'Local Buffer Hit %',
-                accessor: (d: QueriesTablePayload) => {
+                accessor: (d: QueriesTableRow) => {
                     let sum = d.local_blks_hit + d.local_blks_read;
-                    if (sum === 0) return "0%";
-                    return ((d.local_blks_hit / sum) * 100).toFixed(2) + "%"
-                }
+                    if (sum === 0) return 0;
+                    return ((d.local_blks_hit / sum) * 100)
+                },
+                Cell: (props: any) => props.value.toFixed(0) + "%"
             }
         ];
-        const data = this.props.queries.table
-            .filter((qt => this.props.datasources.selected.map((ds => ds.id)).includes(qt.datasource.id))) //todo - don't pick all tables? force only one?
-            .flatMap((qt => qt.payload));
+
+        const data: Array<QueriesTableRow> = this.props.queries.table
+            .filter((qt => this.props.datasources.selectedBackend.map((ds => ds.id)).includes(qt.datasourceId)))
+            .flatMap((qt => qt.payload.map(p => ({...p, datasourceId: qt.datasourceId}))));
 
         return <ReactTable
             data={data}
             columns={columns}
             defaultPageSize={10}>
             {(tableState, makeTable, instance) => {
-                const displayedQueries = tableState.sortedData.slice(tableState.startRow, tableState.endRow).map(x => x.query);
-                if (this.props.queries.displayed.toString() !== displayedQueries.toString()) {
+                const displayedQueries = tableState.sortedData.slice(tableState.startRow, tableState.endRow).map(x => x._original as QueriesTableRow);
+                if (JSON.stringify(this.props.queries.displayed) !== JSON.stringify(displayedQueries)) {
                     this.props.setQueriesDisplayed(displayedQueries);
                 }
                 return makeTable()
@@ -198,21 +216,30 @@ class Queries extends React.Component<Props, InternalState> {
         </ReactTable>
     }
 
-    renderChart(data: Array<XySeries>, series: Array<string>, title: string, yAxis?: string): ReactNode {
+    renderChart(data: Array<XySeries>, tableRows: Array<QueriesTableRow>, title: string, yAxis?: string): ReactNode {
         if (typeof data === 'undefined' || data.length !== 1) {
             return <div>No data</div>
         }
         const actualData = data[0];
 
-        // make data depend on displayed table
-        const filteredDatasets = actualData.datasets.filter(d => series.includes(d.label));
+        // make visible only queries displayed in table
+        const filteredDatasets = actualData.datasets.filter(d => tableRows.some(qt => qt.datasourceId === d.label[0] && qt.query === d.label[1]));
+
+        // format series labels to show datasource in human format
+        const mappedDatasets =
+            this.props.datasources.selected.length === 1
+                ? filteredDatasets.map(d => ({data: d.data, label: d.label[1]}))
+                : filteredDatasets.map(d => ({
+                    data: d.data,
+                    label: "[" + Utils.GetLabelFromBackendDatasource(d.label[0], this.props.datasources.selected) + "] " + d.label[1]
+                }));
 
         // format displayed time depending on selected time range
         const sortedLabels = actualData.labels.sort();
-        const mappedLabels = sortedLabels.map(l => TimeUtils.FormatTime(moment.unix(sortedLabels[0]),
+        const mappedLabels = sortedLabels.map(l => Utils.FormatTime(moment.unix(sortedLabels[0]),
             moment.unix(sortedLabels[sortedLabels.length - 1]), moment.unix(l)));
 
-        return (<Line data={{labels: mappedLabels, datasets: filteredDatasets}}
+        return (<Line data={{labels: mappedLabels, datasets: mappedDatasets}}
                       legend={{position: 'bottom'}}
                       options={{
                           title: {

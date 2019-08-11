@@ -1,6 +1,7 @@
 import {
     QueriesActions,
     QueriesTable,
+    QueriesTableRow,
     SET_QUERIES_CALLS_CHART,
     SET_QUERIES_DISPLAYED,
     SET_QUERIES_TABLE,
@@ -13,7 +14,7 @@ export const setQueriesTable = (data: Array<QueriesTable>): QueriesActions => ({
     payload: data
 });
 
-export const setQueriesDisplayed = (data: Array<string>): QueriesActions => ({
+export const setQueriesDisplayed = (data: Array<QueriesTableRow>): QueriesActions => ({
     type: SET_QUERIES_DISPLAYED,
     payload: data
 });
