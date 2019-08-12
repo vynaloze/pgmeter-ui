@@ -102,9 +102,7 @@ class Tables extends React.Component<Props, InternalState> {
     }
 
     fetchChartData() {
-        const xyKeys = ["seq_scan", "seq_tup_fetch",
-            // "idx_scan", "idx_tup_fetch", fixme
-            "live_tup", "dead_tup", "ins_tup",
+        const xyKeys = ["seq_scan", "seq_tup_fetch", "idx_scan", "idx_tup_fetch", "live_tup", "dead_tup", "ins_tup",
             "upd_tup", "del_tup", "vacuum_count", "autovacuum_count", "analyze_count", "autoanalyze_count"];
         xyKeys.forEach((k: string) => {
             const req = {
@@ -272,14 +270,14 @@ class Tables extends React.Component<Props, InternalState> {
                             {this.renderChart(this.props.tables.data.charts.idx_tup_fetch, "Index Scans - Rows Fetched", 1)}
                         </div>
                     </div>
-                    {/*fixme <div className="row">*/}
-                    {/*    <div className="Element Chart col">*/}
-                    {/*        {this.renderChart(this.props.tables.data.charts.live_tup, "Live Rows", 2)}*/}
-                    {/*    </div>*/}
-                    {/*    <div className="Element Chart col">*/}
-                    {/*        {this.renderChart(this.props.tables.data.charts.dead_tup, "Dead Rows", 2)}*/}
-                    {/*    </div>*/}
-                    {/*</div>*/}
+                    <div className="row">
+                        <div className="Element Chart col">
+                            {this.renderChart(this.props.tables.data.charts.live_tup, "Live Rows", 2)}
+                        </div>
+                        <div className="Element Chart col">
+                            {this.renderChart(this.props.tables.data.charts.dead_tup, "Dead Rows", 2)}
+                        </div>
+                    </div>
                     <div className="row no-gutters">
                         <div className="Element Chart col" style={{maxWidth: '32%'}}>
                             {this.renderChart(this.props.tables.data.charts.ins_tup, "Inserted Rows", 3)}
