@@ -7,13 +7,19 @@ export interface TablesState {
 }
 
 export interface Table {
-    id: number
-    label: string
+    id: number    // internal id for the select box
+    label: string // == table
+    group: string // == human-readable datasource
+    datasourceId: number
 }
 
 export interface TablesData {
-    overview: Array<TablesTablePayload>
+    overview: Array<TablesTableEntry>
     charts: TablesXyPayload
+}
+
+export interface TablesTableEntry extends TablesTablePayload {
+    datasourceId: number
 }
 
 export interface TablesTablePayload {

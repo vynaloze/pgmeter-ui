@@ -3,7 +3,7 @@ import './index.css';
 import StyledSelect from "../StyledSelect";
 import {TimeRangeState} from "../_store/timeRange/types";
 import {DatasourceState} from "../_store/datasources/types";
-import {Table, TablesState, TablesTablePayload} from "../_store/stats/tables/types";
+import {Table, TablesState, TablesTableEntry, TablesTablePayload} from "../_store/stats/tables/types";
 import {setAllTables, setDisplayedTables, setTablesData} from '../_store/stats/tables/actions';
 import ApiClient from "../ApiClient";
 import {AppState} from "../_store";
@@ -12,7 +12,7 @@ import TranslateRequest from "../ApiClient/body";
 import VerticalTable from "../VerticalTable";
 import moment from "moment"
 import {XySeries} from "../_store/stats/types";
-import * as TimeUtils from "./Utils";
+import * as Utils from "./Utils";
 import {Line} from "react-chartjs-2";
 
 interface StateFromProps {
@@ -62,10 +62,15 @@ class Tables extends React.Component<Props, InternalState> {
         this.setState({loading: true});
         ApiClient.getRecentStats("pg_stat_user_tables",
             (response => {
+                let index = 0;
                 const tables: Array<Table> = response
                     .filter(((r: any) => this.props.datasources.selectedBackend.map((ds => ds.id)).includes(r.datasource.id)))
-                    .flatMap((r: any) => r.payload)
-                    .map((p: any, index: number) => ({id: index, label: p.table}));
+                    .flatMap((r: any) => r.payload.map((p: any) => ({
+                        id: index++,
+                        label: p.table,
+                        group: Utils.GetLabelFromBackendDatasource(r.datasource.id, this.props.datasources.selected),
+                        datasourceId: r.datasource.id
+                    })));
                 this.props.setAllTables(tables);
                 this.setState({error: null, loading: false})
             }),
@@ -80,10 +85,13 @@ class Tables extends React.Component<Props, InternalState> {
     fetchOverviewData() {
         ApiClient.getRecentStats("pg_stat_user_tables",
             (response => {
-                let overview: Array<TablesTablePayload> = [];
+                let overview: Array<TablesTableEntry> = [];
                 response
                     .filter(((r: any) => this.props.datasources.selectedBackend.map((ds => ds.id)).includes(r.datasource.id)))
-                    .flatMap((r: any) => r.payload)
+                    .flatMap((r: any) => r.payload.map((p: TablesTablePayload) => ({
+                        ...p,
+                        datasourceId: r.datasource.id
+                    })))
                     .forEach((p: any) => overview.push(p));
                 let data = this.props.tables.data;
                 data.overview = overview;
@@ -94,7 +102,9 @@ class Tables extends React.Component<Props, InternalState> {
     }
 
     fetchChartData() {
-        const xyKeys = ["seq_scan", "seq_tup_fetch", "idx_scan", "idx_tup_fetch", "live_tup", "dead_tup", "ins_tup",
+        const xyKeys = ["seq_scan", "seq_tup_fetch",
+            // "idx_scan", "idx_tup_fetch", fixme
+            "live_tup", "dead_tup", "ins_tup",
             "upd_tup", "del_tup", "vacuum_count", "autovacuum_count", "analyze_count", "autoanalyze_count"];
         xyKeys.forEach((k: string) => {
             const req = {
@@ -114,6 +124,9 @@ class Tables extends React.Component<Props, InternalState> {
                         type: "key"
                     },
                     dimension: [{
+                        name: "ds",
+                        type: "datasource"
+                    }, {
                         name: "table",
                         type: "key"
                     }]
@@ -137,20 +150,31 @@ class Tables extends React.Component<Props, InternalState> {
 
     renderChart(data: XySeries | undefined, title: string, colorIndex: number, yAxis?: string): ReactNode {
         if (typeof data === 'undefined') {
-            return <div>No data</div>
+            return <div/>
         }
 
-        // make data depend on displayed table
-        const filteredDatasets = data.datasets.filter(d => this.props.tables.displayed.map((t => t.label)).includes(d.label)); //fixme again - multiple tables or not?
+        // show only chosen tables
+        const filteredDatasets = data.datasets.filter(d => this.props.tables.displayed.some(t => t.datasourceId === d.label[0] && t.label === d.label[1]));
+
+        // format series labels to show datasource in human format
+        const mappedDatasets =
+            this.props.datasources.selected.length === 1
+                ? filteredDatasets.map(d => ({data: d.data, label: d.label[1]}))
+                : filteredDatasets.map(d => ({
+                    data: d.data,
+                    label: "[" + Utils.GetLabelFromBackendDatasource(d.label[0], this.props.datasources.selected) + "] " + d.label[1]
+                }));
 
         // format displayed time depending on selected time range
         const sortedLabels = data.labels.sort();
-        const mappedLabels = sortedLabels.map(l => TimeUtils.FormatTime(moment.unix(sortedLabels[0]),
+        const mappedLabels = sortedLabels.map(l => Utils.FormatTime(moment.unix(sortedLabels[0]),
             moment.unix(sortedLabels[sortedLabels.length - 1]), moment.unix(l)));
 
-        const getSingleColor = (schemeColors: any[]) => [schemeColors[colorIndex % schemeColors.length]];
-
-        return (<Line data={{labels: mappedLabels, datasets: filteredDatasets}}
+        const shiftFirstColor = (schemeColors: any[]) => {
+            for (let i = 0; i < colorIndex % schemeColors.length; i++) schemeColors.push(schemeColors.shift());
+            return schemeColors;
+        };
+        return (<Line data={{labels: mappedLabels, datasets: mappedDatasets}}
                       legend={{position: 'bottom'}}
                       options={{
                           title: {
@@ -170,7 +194,7 @@ class Tables extends React.Component<Props, InternalState> {
                           plugins: {
                               colorschemes: {
                                   scheme: 'brewer.DarkTwo8',
-                                  custom: getSingleColor,
+                                  custom: shiftFirstColor,
                               }
                           }
                       }}/>)
@@ -178,7 +202,7 @@ class Tables extends React.Component<Props, InternalState> {
 
     render() {
         const t = this.props.tables.data.overview
-            .filter((o) => this.props.tables.displayed.map((t => t.label)).includes(o.table))[0]; //fixme - decide if support multiple tables or not
+            .filter((o) => this.props.tables.displayed.map((t => t.label)).includes(o.table))[0]; //fixme - can't decide how to do it - multiple tables or not
         const tableData: any = t === undefined ?
             {
                 "Size": " - ",
@@ -222,15 +246,15 @@ class Tables extends React.Component<Props, InternalState> {
                                 all={this.props.tables.all || undefined}
                                 selected={this.props.tables.displayed || undefined}
                                 placeholder={"Pick table..."}
-                                maxSelected={1}
                                 loading={this.state.loading}
+                                withGrouping={this.props.datasources.selected.length > 1}
                                 handleChange={this.handleTableSelection}
                             />
                         </div>
                         <div className="col"/>
                     </div>
                 </div>
-                <VerticalTable data={tableData}/>
+                {this.props.tables.displayed.length === 1 ? <VerticalTable data={tableData}/> : null}
                 <div className="container-fluid">
                     <div className="row">
                         <div className="Element Chart col">
@@ -248,14 +272,14 @@ class Tables extends React.Component<Props, InternalState> {
                             {this.renderChart(this.props.tables.data.charts.idx_tup_fetch, "Index Scans - Rows Fetched", 1)}
                         </div>
                     </div>
-                    <div className="row">
-                        <div className="Element Chart col">
-                            {this.renderChart(this.props.tables.data.charts.live_tup, "Live Rows", 2)}
-                        </div>
-                        <div className="Element Chart col">
-                            {this.renderChart(this.props.tables.data.charts.dead_tup, "Dead Rows", 2)}
-                        </div>
-                    </div>
+                    {/*fixme <div className="row">*/}
+                    {/*    <div className="Element Chart col">*/}
+                    {/*        {this.renderChart(this.props.tables.data.charts.live_tup, "Live Rows", 2)}*/}
+                    {/*    </div>*/}
+                    {/*    <div className="Element Chart col">*/}
+                    {/*        {this.renderChart(this.props.tables.data.charts.dead_tup, "Dead Rows", 2)}*/}
+                    {/*    </div>*/}
+                    {/*</div>*/}
                     <div className="row no-gutters">
                         <div className="Element Chart col" style={{maxWidth: '32%'}}>
                             {this.renderChart(this.props.tables.data.charts.ins_tup, "Inserted Rows", 3)}

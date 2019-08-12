@@ -11,6 +11,7 @@ interface Props {
     selected: Array<any>
     placeholder: string
     loading: boolean
+    withGrouping: boolean
 
     handleChange(a: any): void
 }
@@ -25,6 +26,7 @@ class StyledSelect extends React.Component<Props, InternalState> {
         selected: [],
         placeholder: "",
         loading: false,
+        withGrouping: false,
         handleChange(a: any): void {
         }
     };
@@ -62,6 +64,7 @@ class StyledSelect extends React.Component<Props, InternalState> {
                         selectedItems={this.props.selected}
                         onChange={this.props.handleChange}
                         loading={this.props.loading}
+                        withGrouping={this.props.withGrouping}
                     /> : null}
             </div>
         </div>
