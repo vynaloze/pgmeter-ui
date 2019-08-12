@@ -53,8 +53,14 @@ class Tables extends React.Component<Props, InternalState> {
     componentDidUpdate(prevProps: Readonly<StateFromProps & DispatchFromProps>, prevState: Readonly<InternalState>, snapshot?: any): void {
         if (this.props.datasources.selected.length > 0
             && this.props.datasources.selected !== prevProps.datasources.selected) {
+            this.props.setTablesData({overview: [], charts: {}});
             this.fetchTables();
             this.fetchTableData();
+        }
+        if (this.props.datasources.selected.length < 1
+            && this.props.datasources.selected !== prevProps.datasources.selected) {
+            if (this.props.tables.all.length > 0) this.props.setAllTables([]);
+            if (this.props.tables.displayed.length > 0) this.props.setDisplayedTables([]);
         }
     }
 
