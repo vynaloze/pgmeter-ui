@@ -46,26 +46,27 @@ class Tables extends React.Component<Props, InternalState> {
 
     componentDidMount(): void {
         if (this.props.datasources.selected.length > 0) {
-            this.fetchTables()
+            this.fetchTables();
+            this.fetchTableData();
         }
     }
 
     componentDidUpdate(prevProps: Readonly<StateFromProps & DispatchFromProps>, prevState: Readonly<InternalState>, snapshot?: any): void {
-        if (this.props.datasources.selected.length > 0
-            && this.props.datasources.selected !== prevProps.datasources.selected) {
+        if (Utils.SelectedDatasourcesHaveChanged(this.props.datasources.selected, prevProps.datasources.selected)) {
             this.props.setTablesData({overview: [], charts: {}});
-            this.fetchTables();
-            this.fetchTableData();
-        }
-        if (this.props.datasources.selected.length < 1
-            && this.props.datasources.selected !== prevProps.datasources.selected) {
-            if (this.props.tables.all.length > 0) this.props.setAllTables([]);
-            if (this.props.tables.displayed.length > 0) this.props.setDisplayedTables([]);
+            if (this.props.datasources.selected.length > 0) {
+                this.setState({loading: true});
+                this.fetchTables();
+                this.fetchTableData();
+                this.setState({loading: false});
+            } else {
+                this.props.setDisplayedTables([]);
+                this.props.setAllTables([]);
+            }
         }
     }
 
     fetchTables() {
-        this.setState({loading: true});
         ApiClient.getRecentStats("pg_stat_user_tables",
             (response => {
                 let index = 0;
@@ -78,9 +79,11 @@ class Tables extends React.Component<Props, InternalState> {
                         datasourceId: r.datasource.id
                     })));
                 this.props.setAllTables(tables);
-                this.setState({error: null, loading: false})
+                this.props.setDisplayedTables(tables.filter(t => this.props.tables.displayed.some(
+                    t2 => t2.label === t.label && t2.datasourceId === t.datasourceId)));
+                this.setState({error: null})
             }),
-            (error => this.setState({error: "Error fetching tables: " + error.toString(), loading: false})));
+            (error => this.setState({error: "Error fetching tables: " + error.toString()})));
     }
 
     fetchTableData() {
@@ -170,12 +173,13 @@ class Tables extends React.Component<Props, InternalState> {
                 }));
 
         // format displayed time depending on selected time range
-        const sortedLabels = data.labels.sort();
-        const mappedLabels = sortedLabels.map(l => Utils.FormatTime(moment.unix(sortedLabels[0]),
-            moment.unix(sortedLabels[sortedLabels.length - 1]), moment.unix(l)));
+        const mappedLabels = data.labels.map(l => Utils.FormatTime(moment.unix(data.labels[0]),
+            moment.unix(data.labels[data.labels.length - 1]), moment.unix(l)));
 
-        const shiftFirstColor = (schemeColors: any[]) => {
-            for (let i = 0; i < colorIndex % schemeColors.length; i++) schemeColors.push(schemeColors.shift());
+        const shiftFirstColorForSingleTable = (schemeColors: any[]) => {
+            if (this.props.tables.displayed.length === 1) {
+                for (let i = 0; i < colorIndex % schemeColors.length; i++) schemeColors.push(schemeColors.shift());
+            }
             return schemeColors;
         };
         return (<Line data={{labels: mappedLabels, datasets: mappedDatasets}}
@@ -198,7 +202,7 @@ class Tables extends React.Component<Props, InternalState> {
                           plugins: {
                               colorschemes: {
                                   scheme: 'brewer.DarkTwo8',
-                                  custom: shiftFirstColor,
+                                  custom: shiftFirstColorForSingleTable,
                               }
                           }
                       }}/>)

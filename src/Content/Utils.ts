@@ -20,3 +20,10 @@ export function GetLabelFromBackendDatasource(id: number, datasources: Array<Dat
     if (datasource !== undefined) return datasource.label;
     return "";
 }
+
+export function SelectedDatasourcesHaveChanged(datasources1: Array<Datasource>, datasources2: Array<Datasource>): boolean {
+    if (datasources1.length !== datasources2.length) return true;
+    const ids1 = datasources1.map(ds => ds.id);
+    const ids2 = datasources2.map(ds => ds.id);
+    return !(ids1.every(id => ids2.includes(id)) && ids2.every(id => ids1.includes(id)));
+}

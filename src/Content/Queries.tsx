@@ -60,8 +60,7 @@ class Queries extends React.Component<Props, InternalState> {
     }
 
     componentDidUpdate(prevProps: Props, prevState: any, snapshot: any) {
-        if (prevProps.timeRange.start !== this.props.timeRange.start || prevProps.timeRange.end !== this.props.timeRange.end
-            || prevProps.datasources.selected !== this.props.datasources.selected) {
+        if (Utils.SelectedDatasourcesHaveChanged(this.props.datasources.selected, prevProps.datasources.selected)) {
             this.fetchData()
         }
     }
@@ -235,9 +234,8 @@ class Queries extends React.Component<Props, InternalState> {
                 }));
 
         // format displayed time depending on selected time range
-        const sortedLabels = actualData.labels.sort();
-        const mappedLabels = sortedLabels.map(l => Utils.FormatTime(moment.unix(sortedLabels[0]),
-            moment.unix(sortedLabels[sortedLabels.length - 1]), moment.unix(l)));
+        const mappedLabels = actualData.labels.map(l => Utils.FormatTime(moment.unix(actualData.labels[0]),
+            moment.unix(actualData.labels[actualData.labels.length - 1]), moment.unix(l)));
 
         return (<Line data={{labels: mappedLabels, datasets: mappedDatasets}}
                       legend={{position: 'bottom'}}
