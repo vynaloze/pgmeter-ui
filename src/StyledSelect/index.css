@@ -50,3 +50,9 @@
     color: var(--text) !important;
     background-color: var(--bg-header-hover) !important;
 }
+
+.StyledSelect .kn-item_label__label___2fJ5p {
+    white-space: normal;
+    text-align: center;
+    vertical-align: middle;
+}

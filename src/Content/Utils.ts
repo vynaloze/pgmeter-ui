@@ -1,6 +1,5 @@
 import {Moment} from "moment";
 import {Datasource} from "../_store/datasources/types";
-import {Table} from "../_store/stats/tables/types";
 
 export function FormatTime(start: Moment, end: Moment, value: Moment): string {
     if (end.diff(start, "minutes") < 15) {
@@ -27,14 +26,4 @@ export function SelectedDatasourcesHaveChanged(datasources1: Array<Datasource>, 
     const ids1 = datasources1.map(ds => ds.id);
     const ids2 = datasources2.map(ds => ds.id);
     return !(ids1.every(id => ids2.includes(id)) && ids2.every(id => ids1.includes(id)));
-}
-
-export function SelectedTablesHaveChanged(tables1: Array<Table>, tables2: Array<Table>): boolean {
-    if (tables1.length !== tables2.length) return true;
-    let s1 = tables1.sort();
-    let s2 = tables2.sort();
-    for (let i = 0; i < s1.length; i++) {
-        if (s1[i].datasourceId !== s2[i].datasourceId || s1[i].label !== s2[i].label) return true;
-    }
-    return false;
 }

@@ -68,7 +68,7 @@ class Indexes extends React.Component<Props, InternalState> {
             }
         }
 
-        if (Utils.SelectedTablesHaveChanged(this.props.tables.displayed, prevProps.tables.displayed)) {
+        if (this.selectedTablesHaveChanged(prevProps.tables.displayed)) {
             this.props.setIndexesData({overview: [], charts: {}});
             if (this.props.tables.displayed.length > 0) {
                 this.setState({loading: true});
@@ -80,6 +80,17 @@ class Indexes extends React.Component<Props, InternalState> {
                 this.props.setAllIndexes([]);
             }
         }
+    }
+
+    selectedTablesHaveChanged(prevTables: Array<Table>): boolean {
+        const tables = this.props.tables.displayed;
+        if (tables.length !== prevTables.length) return true;
+        let s1 = tables.sort();
+        let s2 = prevTables.sort();
+        for (let i = 0; i < s1.length; i++) {
+            if (s1[i].datasourceId !== s2[i].datasourceId || s1[i].label !== s2[i].label) return true;
+        }
+        return false;
     }
 
     fetchTables() {
@@ -106,13 +117,18 @@ class Indexes extends React.Component<Props, InternalState> {
             (response => {
                 const filteredByDatasources: any = response.filter(((r: any) => this.props.datasources.selectedBackend.map((ds => ds.id)).includes(r.datasource.id)));
                 let indexIndex = 0;
-                const indexes: Array<Index> = filteredByDatasources.flatMap((r: any) => r.payload.map((p: any) => ({
-                    id: indexIndex++,
-                    label: p.index,
-                    group: "[" + Utils.GetLabelFromBackendDatasource(r.datasource.id, this.props.datasources.selected) + "]\n" + p.table,
-                    table: p.table,
-                    datasourceId: r.datasource.id
-                })));
+                const indexes: Array<Index> = filteredByDatasources.flatMap((r: any) => r.payload.map((p: any) => {
+                    const group = this.props.datasources.selected.length > 1 ?
+                        Utils.GetLabelFromBackendDatasource(r.datasource.id, this.props.datasources.selected) + "\n" + p.table
+                        : p.table;
+                    return {
+                        id: indexIndex++,
+                        label: p.index,
+                        group: group,
+                        table: p.table,
+                        datasourceId: r.datasource.id
+                    }
+                }));
                 const filteredIndexes = indexes
                     .filter(i => this.props.tables.displayed.some(t => t.datasourceId === i.datasourceId && t.label === i.table));
                 this.props.setAllIndexes(filteredIndexes);
