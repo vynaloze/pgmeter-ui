@@ -1,4 +1,4 @@
-import React, {ReactNode} from 'react';
+import React from 'react';
 import './index.css';
 import StyledSelect from "../StyledSelect";
 import {TimeRangeState} from "../_store/timeRange/types";
@@ -11,9 +11,9 @@ import {connect} from "react-redux";
 import TranslateRequest from "../ApiClient/body";
 import VerticalTable from "../VerticalTable";
 import moment from "moment"
-import {XySeries} from "../_store/stats/types";
+import {Series} from "../_store/stats/types";
 import * as Utils from "./Utils";
-import {Line} from "react-chartjs-2";
+import StyledLineChart from "../StyledLineChart";
 
 interface StateFromProps {
     timeRange: TimeRangeState
@@ -42,6 +42,9 @@ class Tables extends React.Component<Props, InternalState> {
             loading: false
         };
         this.handleTableSelection = this.handleTableSelection.bind(this);
+        this.datasetFilter = this.datasetFilter.bind(this);
+        this.datasetMapper = this.datasetMapper.bind(this);
+        this.labelMapper = this.labelMapper.bind(this);
     }
 
     componentDidMount(): void {
@@ -155,57 +158,22 @@ class Tables extends React.Component<Props, InternalState> {
         this.props.setDisplayedTables(selected);
     }
 
-    renderChart(data: XySeries | undefined, title: string, colorIndex: number, yAxis?: string): ReactNode {
-        if (typeof data === 'undefined') {
-            return <div/>
+    datasetFilter(dataset: Series): boolean {
+        return this.props.tables.displayed.some(table => table.datasourceId === dataset.label[0] && table.label === dataset.label[1]);
+    }
+
+    datasetMapper(datasets: Array<Series>): Array<Series> {
+        if (this.props.datasources.selected.length === 1) {
+            return datasets.map(d => ({data: d.data, label: d.label[1]}))
         }
+        return datasets.map(d => ({
+            data: d.data,
+            label: "[" + Utils.GetLabelFromBackendDatasource(d.label[0], this.props.datasources.selected) + "] " + d.label[1]
+        }))
+    }
 
-        // show only chosen tables
-        const filteredDatasets = data.datasets.filter(d => this.props.tables.displayed.some(t => t.datasourceId === d.label[0] && t.label === d.label[1]));
-
-        // format series labels to show datasource in human format
-        const mappedDatasets =
-            this.props.datasources.selected.length === 1
-                ? filteredDatasets.map(d => ({data: d.data, label: d.label[1]}))
-                : filteredDatasets.map(d => ({
-                    data: d.data,
-                    label: "[" + Utils.GetLabelFromBackendDatasource(d.label[0], this.props.datasources.selected) + "] " + d.label[1]
-                }));
-
-        // format displayed time depending on selected time range
-        const mappedLabels = data.labels.map(l => Utils.FormatTime(moment.unix(data.labels[0]),
-            moment.unix(data.labels[data.labels.length - 1]), moment.unix(l)));
-
-        const shiftFirstColorForSingleTable = (schemeColors: any[]) => {
-            if (this.props.tables.displayed.length === 1) {
-                for (let i = 0; i < colorIndex % schemeColors.length; i++) schemeColors.push(schemeColors.shift());
-            }
-            return schemeColors;
-        };
-        return (<Line data={{labels: mappedLabels, datasets: mappedDatasets}}
-                      legend={{position: 'bottom'}}
-                      options={{
-                          title: {
-                              display: true,
-                              text: title,
-                              fontStyle: 'normal'
-                          },
-                          scales: {
-                              yAxes: [{
-                                  scaleLabel: {
-                                      display: yAxis !== undefined,
-                                      labelString: yAxis
-                                  }
-                              }]
-                          },
-                          maintainAspectRatio: false,
-                          plugins: {
-                              colorschemes: {
-                                  scheme: 'brewer.DarkTwo8',
-                                  custom: shiftFirstColorForSingleTable,
-                              }
-                          }
-                      }}/>)
+    labelMapper(labels: Array<any>): Array<any> {
+        return labels.map(l => Utils.FormatTime(moment.unix(labels[0]), moment.unix(labels[labels.length - 1]), moment.unix(l)));
     }
 
     render() {
@@ -266,54 +234,158 @@ class Tables extends React.Component<Props, InternalState> {
                 <div className="container-fluid">
                     <div className="row">
                         <div className="Element Chart col">
-                            {this.renderChart(this.props.tables.data.charts.seq_scan, "Sequential Scans", 0)}
+                            <StyledLineChart
+                                data={this.props.tables.data.charts.seq_scan}
+                                title={"Sequential Scans"}
+                                shiftColors={this.props.tables.displayed.length === 1}
+                                colorIndex={0}
+                                datasetFilter={this.datasetFilter}
+                                datasetMapper={this.datasetMapper}
+                                labelMapper={this.labelMapper}
+                            />
                         </div>
                         <div className="Element Chart col">
-                            {this.renderChart(this.props.tables.data.charts.seq_tup_fetch, "Sequential Scans - Rows Fetched", 0)}
+                            <StyledLineChart
+                                data={this.props.tables.data.charts.seq_tup_fetch}
+                                title={"Sequential Scans - Rows Fetched"}
+                                shiftColors={this.props.tables.displayed.length === 1}
+                                colorIndex={0}
+                                datasetFilter={this.datasetFilter}
+                                datasetMapper={this.datasetMapper}
+                                labelMapper={this.labelMapper}
+                            />
                         </div>
                     </div>
                     <div className="row">
                         <div className="Element Chart col">
-                            {this.renderChart(this.props.tables.data.charts.idx_scan, "Index Scans", 1)}
+                            <StyledLineChart
+                                data={this.props.tables.data.charts.idx_scan}
+                                title={"Index Scans"}
+                                shiftColors={this.props.tables.displayed.length === 1}
+                                colorIndex={1}
+                                datasetFilter={this.datasetFilter}
+                                datasetMapper={this.datasetMapper}
+                                labelMapper={this.labelMapper}
+                            />
                         </div>
                         <div className="Element Chart col">
-                            {this.renderChart(this.props.tables.data.charts.idx_tup_fetch, "Index Scans - Rows Fetched", 1)}
+                            <StyledLineChart
+                                data={this.props.tables.data.charts.idx_tup_fetch}
+                                title={"Index Scans - Rows Fetched"}
+                                shiftColors={this.props.tables.displayed.length === 1}
+                                colorIndex={1}
+                                datasetFilter={this.datasetFilter}
+                                datasetMapper={this.datasetMapper}
+                                labelMapper={this.labelMapper}
+                            />
                         </div>
                     </div>
                     <div className="row">
                         <div className="Element Chart col">
-                            {this.renderChart(this.props.tables.data.charts.live_tup, "Live Rows", 2)}
+                            <StyledLineChart
+                                data={this.props.tables.data.charts.live_tup}
+                                title={"Live Rows"}
+                                shiftColors={this.props.tables.displayed.length === 1}
+                                colorIndex={2}
+                                datasetFilter={this.datasetFilter}
+                                datasetMapper={this.datasetMapper}
+                                labelMapper={this.labelMapper}
+                            />
                         </div>
                         <div className="Element Chart col">
-                            {this.renderChart(this.props.tables.data.charts.dead_tup, "Dead Rows", 2)}
+                            <StyledLineChart
+                                data={this.props.tables.data.charts.dead_tup}
+                                title={"Dead Rows"}
+                                shiftColors={this.props.tables.displayed.length === 1}
+                                colorIndex={2}
+                                datasetFilter={this.datasetFilter}
+                                datasetMapper={this.datasetMapper}
+                                labelMapper={this.labelMapper}
+                            />
                         </div>
                     </div>
                     <div className="row no-gutters">
                         <div className="Element Chart col" style={{maxWidth: '32%'}}>
-                            {this.renderChart(this.props.tables.data.charts.ins_tup, "Inserted Rows", 3)}
+                            <StyledLineChart
+                                data={this.props.tables.data.charts.ins_tup}
+                                title={"Inserted Rows"}
+                                shiftColors={this.props.tables.displayed.length === 1}
+                                colorIndex={3}
+                                datasetFilter={this.datasetFilter}
+                                datasetMapper={this.datasetMapper}
+                                labelMapper={this.labelMapper}
+                            />
                         </div>
                         <div className="Element Chart col" style={{maxWidth: '32%'}}>
-                            {this.renderChart(this.props.tables.data.charts.upd_tup, "Updated Rows", 3)}
+                            <StyledLineChart
+                                data={this.props.tables.data.charts.upd_tup}
+                                title={"Updated Rows"}
+                                shiftColors={this.props.tables.displayed.length === 1}
+                                colorIndex={3}
+                                datasetFilter={this.datasetFilter}
+                                datasetMapper={this.datasetMapper}
+                                labelMapper={this.labelMapper}
+                            />
                         </div>
                         <div className="Element Chart col" style={{maxWidth: '32%'}}>
-                            {this.renderChart(this.props.tables.data.charts.dead_tup, "Deleted Rows", 3)}
+                            <StyledLineChart
+                                data={this.props.tables.data.charts.dead_tup}
+                                title={"Deleted Rows"}
+                                shiftColors={this.props.tables.displayed.length === 1}
+                                colorIndex={3}
+                                datasetFilter={this.datasetFilter}
+                                datasetMapper={this.datasetMapper}
+                                labelMapper={this.labelMapper}
+                            />
                         </div>
                     </div>
                     {/* TODO cache hits % */}
                     <div className="row">
                         <div className="Element Chart col">
-                            {this.renderChart(this.props.tables.data.charts.vacuum_count, "Vacuums", 4)}
+                            <StyledLineChart
+                                data={this.props.tables.data.charts.vacuum_count}
+                                title={"Vacuums"}
+                                shiftColors={this.props.tables.displayed.length === 1}
+                                colorIndex={4}
+                                datasetFilter={this.datasetFilter}
+                                datasetMapper={this.datasetMapper}
+                                labelMapper={this.labelMapper}
+                            />
                         </div>
                         <div className="Element Chart col">
-                            {this.renderChart(this.props.tables.data.charts.autovacuum_count, "Autovacuums", 4)}
+                            <StyledLineChart
+                                data={this.props.tables.data.charts.autovacuum_count}
+                                title={"Autovacuums"}
+                                shiftColors={this.props.tables.displayed.length === 1}
+                                colorIndex={4}
+                                datasetFilter={this.datasetFilter}
+                                datasetMapper={this.datasetMapper}
+                                labelMapper={this.labelMapper}
+                            />
                         </div>
                     </div>
                     <div className="row">
                         <div className="Element Chart col">
-                            {this.renderChart(this.props.tables.data.charts.analyze_count, "Analyzes", 5)}
+                            <StyledLineChart
+                                data={this.props.tables.data.charts.analyze_count}
+                                title={"Analyzes"}
+                                shiftColors={this.props.tables.displayed.length === 1}
+                                colorIndex={5}
+                                datasetFilter={this.datasetFilter}
+                                datasetMapper={this.datasetMapper}
+                                labelMapper={this.labelMapper}
+                            />
                         </div>
                         <div className="Element Chart col">
-                            {this.renderChart(this.props.tables.data.charts.autoanalyze_count, "Autoanalyzes", 5)}
+                            <StyledLineChart
+                                data={this.props.tables.data.charts.autoanalyze_count}
+                                title={"Autoanalyzes"}
+                                shiftColors={this.props.tables.displayed.length === 1}
+                                colorIndex={5}
+                                datasetFilter={this.datasetFilter}
+                                datasetMapper={this.datasetMapper}
+                                labelMapper={this.labelMapper}
+                            />
                         </div>
                     </div>
                 </div>

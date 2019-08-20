@@ -19,12 +19,12 @@ export const setQueriesDisplayed = (data: Array<QueriesTableRow>): QueriesAction
     payload: data
 });
 
-export const setQueriesTimeChart = (data: Array<XySeries>): QueriesActions => ({
+export const setQueriesTimeChart = (data: XySeries): QueriesActions => ({
     type: SET_QUERIES_TIME_CHART,
     payload: data
 });
 
-export const setQueriesCallsChart = (data: Array<XySeries>): QueriesActions => ({
+export const setQueriesCallsChart = (data: XySeries): QueriesActions => ({
     type: SET_QUERIES_CALLS_CHART,
     payload: data
 });

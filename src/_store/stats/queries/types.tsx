@@ -3,8 +3,8 @@ import {Table, XySeries} from "../types";
 export interface QueriesState {
     table: Array<QueriesTable>
     displayed: Array<QueriesTableRow>
-    timeChart: Array<XySeries>
-    callsChart: Array<XySeries>
+    timeChart?: XySeries
+    callsChart?: XySeries
 }
 
 export interface QueriesTable extends Table {
@@ -47,12 +47,12 @@ export interface SetQueriesDisplayed {
 
 export interface SetQueriesTimeChart {
     type: typeof SET_QUERIES_TIME_CHART,
-    payload: Array<XySeries>
+    payload: XySeries
 }
 
 export interface SetQueriesCallsChart {
     type: typeof SET_QUERIES_CALLS_CHART,
-    payload: Array<XySeries>
+    payload: XySeries
 }
 
 export type QueriesActions = SetQueriesTable | SetQueriesDisplayed | SetQueriesTimeChart | SetQueriesCallsChart

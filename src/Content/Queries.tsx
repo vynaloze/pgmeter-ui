@@ -14,16 +14,12 @@ import {
     setQueriesTimeChart
 } from '../_store/stats/queries/actions';
 import {QueriesState, QueriesTable, QueriesTableRow} from "../_store/stats/queries/types";
-import {XySeries} from "../_store/stats/types";
-import {defaults, Line} from 'react-chartjs-2';
+import {Series} from "../_store/stats/types";
 import TranslateRequest from "../ApiClient/body";
 import 'chartjs-plugin-colorschemes';
 import * as moment from "moment";
 import * as Utils from "./Utils";
-// @ts-ignore
-defaults.global.defaultFontColor = '#dee5ec';
-// @ts-ignore
-defaults.global.defaultFontFamily = 'Fira Mono';
+import StyledLineChart from "../StyledLineChart";
 
 
 interface StateFromProps {
@@ -52,7 +48,9 @@ class Queries extends React.Component<Props, InternalState> {
             error: null
         };
         this.renderTable = this.renderTable.bind(this);
-        this.renderChart = this.renderChart.bind(this);
+        this.datasetFilter = this.datasetFilter.bind(this);
+        this.datasetMapper = this.datasetMapper.bind(this);
+        this.labelMapper = this.labelMapper.bind(this);
     }
 
     componentDidMount(): void {
@@ -106,7 +104,7 @@ class Queries extends React.Component<Props, InternalState> {
         } as TranslateRequest;
         ApiClient.getXyStats(timeChartRequest,
             (response => {
-                this.props.setQueriesTimeChart(Array(response));
+                this.props.setQueriesTimeChart(response);
                 this.setState({error: null})
             }),
             (error => this.setState({error: "Error fetching time chart data: " + error.toString()})));
@@ -139,7 +137,7 @@ class Queries extends React.Component<Props, InternalState> {
         } as TranslateRequest;
         ApiClient.getXyStats(callsChartRequest,
             (response => {
-                this.props.setQueriesCallsChart(Array(response));
+                this.props.setQueriesCallsChart(response);
                 this.setState({error: null})
             }),
             (error => this.setState({error: "Error fetching calls chart data: " + error.toString()})));
@@ -215,51 +213,22 @@ class Queries extends React.Component<Props, InternalState> {
         </ReactTable>
     }
 
-    renderChart(data: Array<XySeries>, tableRows: Array<QueriesTableRow>, title: string, yAxis?: string): ReactNode {
-        if (typeof data === 'undefined' || data.length !== 1) {
-            return <div>No data</div>
+    datasetFilter(dataset: Series): boolean {
+        return this.props.queries.displayed.some(queryTable => queryTable.datasourceId === dataset.label[0] && queryTable.query === dataset.label[1])
+    }
+
+    datasetMapper(datasets: Array<Series>): Array<Series> {
+        if (this.props.datasources.selected.length === 1) {
+            return datasets.map(d => ({data: d.data, label: d.label[1]}))
         }
-        const actualData = data[0];
+        return datasets.map(d => ({
+            data: d.data,
+            label: "[" + Utils.GetLabelFromBackendDatasource(d.label[0], this.props.datasources.selected) + "] " + d.label[1]
+        }))
+    }
 
-        // make visible only queries displayed in table
-        const filteredDatasets = actualData.datasets.filter(d => tableRows.some(qt => qt.datasourceId === d.label[0] && qt.query === d.label[1]));
-
-        // format series labels to show datasource in human format
-        const mappedDatasets =
-            this.props.datasources.selected.length === 1
-                ? filteredDatasets.map(d => ({data: d.data, label: d.label[1]}))
-                : filteredDatasets.map(d => ({
-                    data: d.data,
-                    label: "[" + Utils.GetLabelFromBackendDatasource(d.label[0], this.props.datasources.selected) + "] " + d.label[1]
-                }));
-
-        // format displayed time depending on selected time range
-        const mappedLabels = actualData.labels.map(l => Utils.FormatTime(moment.unix(actualData.labels[0]),
-            moment.unix(actualData.labels[actualData.labels.length - 1]), moment.unix(l)));
-
-        return (<Line data={{labels: mappedLabels, datasets: mappedDatasets}}
-                      legend={{position: 'bottom'}}
-                      options={{
-                          title: {
-                              display: true,
-                              text: title,
-                              fontStyle: 'normal'
-                          },
-                          scales: {
-                              yAxes: [{
-                                  scaleLabel: {
-                                      display: yAxis !== undefined,
-                                      labelString: yAxis
-                                  }
-                              }]
-                          },
-                          maintainAspectRatio: false,
-                          plugins: {
-                              colorschemes: {
-                                  scheme: 'brewer.DarkTwo8'
-                              }
-                          }
-                      }}/>)
+    labelMapper(labels: Array<any>): Array<any> {
+        return labels.map(l => Utils.FormatTime(moment.unix(labels[0]), moment.unix(labels[labels.length - 1]), moment.unix(l)));
     }
 
     render() {
@@ -270,10 +239,27 @@ class Queries extends React.Component<Props, InternalState> {
                     {this.renderTable()}
                 </div>
                 <div className="Element Chart">
-                    {this.renderChart(this.props.queries.timeChart, this.props.queries.displayed, "Average time spent on query", "ms")}
+                    <StyledLineChart
+                        data={this.props.queries.timeChart}
+                        title={"Average time spent on query"}
+                        yAxis={"ms"}
+                        shiftColors={false}
+                        colorIndex={0}
+                        datasetFilter={this.datasetFilter}
+                        datasetMapper={this.datasetMapper}
+                        labelMapper={this.labelMapper}
+                    />
                 </div>
                 <div className="Element Chart">
-                    {this.renderChart(this.props.queries.callsChart, this.props.queries.displayed, "Query calls")}
+                    <StyledLineChart
+                        data={this.props.queries.callsChart}
+                        title={"Query calls"}
+                        shiftColors={false}
+                        colorIndex={0}
+                        datasetFilter={this.datasetFilter}
+                        datasetMapper={this.datasetMapper}
+                        labelMapper={this.labelMapper}
+                    />
                 </div>
             </div>
         );
