@@ -77,8 +77,8 @@ export default class VerticalTable extends React.Component<Props, InternalState>
         keys.forEach((key: string) =>
             content.push(
                 <tr>
-                    <th scope="row">{key}</th>
-                    <td>{entry.data[key]}</td>
+                    <th style={{width: '25%'}} scope="row">{key}</th>
+                    <td style={{width: '75%'}}>{entry.data[key]}</td>
                 </tr>
             )
         );
@@ -92,7 +92,7 @@ export default class VerticalTable extends React.Component<Props, InternalState>
                     >Previous
                     </button>
                 </div>
-                <div className="col text-center">
+                <div className="col text-center font-weight-bold">
                     {entry.key}
                 </div>
                 <div className="col-3 text-right">
