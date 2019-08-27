@@ -1,11 +1,53 @@
-.table {
-    margin: auto;
-    width: 75% !important;
-    background: var(--bg-chart) !important;
-    color: var(--text) !important;
+.VerticalTable {
+    width: 75%;
+    background: var(--bg-chart);
+    color: var(--text);
     border-radius: 10px;
+    margin: auto;
     box-shadow: 0px 0px 1px 1px var(--dark-blue);
     transition: all 0.3s ease;
+}
+
+.VerticalTable .Header {
+    background: var(--bg-chart);
+    padding: 10px;
+    /*text-align: center;*/
+}
+
+.VerticalTable button {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 1px solid var(--bg-header);
+    border-radius: 3px;
+    padding: 6px;
+    transition: all .1s ease;
+    cursor: pointer;
+    outline: none;
+    background: var(--bg-header);
+    color: var(--text);
+}
+
+.VerticalTable button:hover {
+    background: var(--bg-header-hover);
+    border: 1px solid var(--blue);
+}
+
+.VerticalTable button[disabled] {
+    opacity: .5;
+}
+
+.VerticalTable button[disabled]:hover {
+    background: var(--bg-header);
+    border: 1px solid var(--bg-header);
+}
+
+.table {
+    background: var(--bg-chart) !important;
+    color: var(--text) !important;
 }
 
 .table th {

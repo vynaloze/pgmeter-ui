@@ -53,9 +53,8 @@
 }
 
 .Content .ReactTable .-pagination .-btn:hover {
-    color: var(--blue);
     background: var(--bg-header-hover);
-    border: 2px solid var(--blue);
+    border: 1px solid var(--blue);
 
 }
 

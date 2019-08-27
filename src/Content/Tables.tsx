@@ -177,41 +177,30 @@ class Tables extends React.Component<Props, InternalState> {
     }
 
     render() {
-        const t = this.props.tables.data.overview
-            .filter((o) => this.props.tables.displayed.map((t => t.label)).includes(o.table))[0]; //fixme - can't decide how to do it - multiple tables or not
-        const tableData: any = t === undefined ?
-            {
-                "Size": " - ",
-                "Bloat": " - ",
-                "Sequential Access": " - ",
-                "Index Access": " - ",
-                "Rows": " - ",
-                "Rows Changes": " - ",
-                "Cache Hits": " - ",
-                "Index Cache Hits": " - ",
-                "TOAST Cache Hits": " - ",
-                "TOAST Index Cache Hits": " - ",
-                "Manual Vacuum": " - ",
-                "Auto Vacuum": " - ",
-                "Manual Analyze": " - ",
-                "Auto Analyze": " - ",
-            } :
-            {
-                "Size": "TODO",
-                "Bloat": "TODO",
-                "Sequential Access": (t.seq_scan || 0) + " scans; " + (t.seq_tup_fetch || 0) + " rows fetched (" + (Math.round(t.seq_tup_fetch / t.seq_scan) || 0) + " rows per scan)",
-                "Index Access": (t.idx_scan || 0) + " scans; " + (t.idx_tup_fetch || 0) + " rows fetched (" + (Math.round(t.idx_tup_fetch / t.idx_scan) || 0) + " rows per scan)",
-                "Rows": (t.live_tup || 0) + " live; " + (t.dead_tup || 0) + " dead (" + ((Math.round(t.live_tup / (t.dead_tup + t.live_tup)) || 0) * 100) + "% live)",
-                "Rows Changes": (t.ins_tup || 0) + " inserts; " + (t.upd_tup || 0) + " updates; " + (t.del_tup || 0) + " deletes",
-                "Cache Hits": "TODO",
-                "Index Cache Hits": "TODO",
-                "TOAST Cache Hits": "TODO",
-                "TOAST Index Cache Hits": "TODO",
-                "Manual Vacuum": (t.vacuum_count || 0) + "" + (moment(t.last_vacuum).isValid() ? "; last at " + moment(t.last_vacuum).format("Do MMM YYYY, H:mm:ss") + " (" + moment(t.last_vacuum).fromNow() + ")" : ""),
-                "Auto Vacuum": (t.autovacuum_count || 0) + "" + (moment(t.last_autovacuum).isValid() ? "; last at " + moment(t.last_autovacuum).format("Do MMM YYYY, H:mm:ss") + " (" + moment(t.last_autovacuum).fromNow() + ")" : ""),
-                "Manual Analyze": (t.analyze_count || 0) + "" + (moment(t.last_analyze).isValid() ? "; last at " + moment(t.last_analyze).format("Do MMM YYYY, H:mm:ss") + " (" + moment(t.last_analyze).fromNow() + ")" : ""),
-                "Auto Analyze": (t.autoanalyze_count || 0) + "" + (moment(t.last_autoanalyze).isValid() ? "; last at " + moment(t.last_autoanalyze).format("Do MMM YYYY, H:mm:ss") + " (" + moment(t.last_autoanalyze).fromNow() + ")" : ""),
-            };
+        const entries: any = this.props.tables.data.overview
+            .filter((t: TablesTableEntry) => this.props.tables.displayed.some(table => table.datasourceId === t.datasourceId && table.label === t.table))
+            .map((t: TablesTableEntry) => {
+                const key = this.props.datasources.selected.length === 1
+                    ? t.table
+                    : "[" + Utils.GetLabelFromBackendDatasource(t.datasourceId, this.props.datasources.selected) + "] " + t.table;
+                const data = {
+                    "Size": "TODO",
+                    "Bloat": "TODO",
+                    "Sequential Access": (t.seq_scan || 0) + " scans; " + (t.seq_tup_fetch || 0) + " rows fetched (" + (Math.round(t.seq_tup_fetch / t.seq_scan) || 0) + " rows per scan)",
+                    "Index Access": (t.idx_scan || 0) + " scans; " + (t.idx_tup_fetch || 0) + " rows fetched (" + (Math.round(t.idx_tup_fetch / t.idx_scan) || 0) + " rows per scan)",
+                    "Rows": (t.live_tup || 0) + " live; " + (t.dead_tup || 0) + " dead (" + ((Math.round(t.live_tup / (t.dead_tup + t.live_tup)) || 0) * 100) + "% live)",
+                    "Rows Changes": (t.ins_tup || 0) + " inserts; " + (t.upd_tup || 0) + " updates; " + (t.del_tup || 0) + " deletes",
+                    "Cache Hits": "TODO",
+                    "Index Cache Hits": "TODO",
+                    "TOAST Cache Hits": "TODO",
+                    "TOAST Index Cache Hits": "TODO",
+                    "Manual Vacuum": (t.vacuum_count || 0) + "" + (moment(t.last_vacuum).isValid() ? "; last at " + moment(t.last_vacuum).format("Do MMM YYYY, H:mm:ss") + " (" + moment(t.last_vacuum).fromNow() + ")" : ""),
+                    "Auto Vacuum": (t.autovacuum_count || 0) + "" + (moment(t.last_autovacuum).isValid() ? "; last at " + moment(t.last_autovacuum).format("Do MMM YYYY, H:mm:ss") + " (" + moment(t.last_autovacuum).fromNow() + ")" : ""),
+                    "Manual Analyze": (t.analyze_count || 0) + "" + (moment(t.last_analyze).isValid() ? "; last at " + moment(t.last_analyze).format("Do MMM YYYY, H:mm:ss") + " (" + moment(t.last_analyze).fromNow() + ")" : ""),
+                    "Auto Analyze": (t.autoanalyze_count || 0) + "" + (moment(t.last_autoanalyze).isValid() ? "; last at " + moment(t.last_autoanalyze).format("Do MMM YYYY, H:mm:ss") + " (" + moment(t.last_autoanalyze).fromNow() + ")" : ""),
+                };
+                return {key, data};
+            });
 
         return (
             <div className="Content">
@@ -230,7 +219,7 @@ class Tables extends React.Component<Props, InternalState> {
                         <div className="col"/>
                     </div>
                 </div>
-                {this.props.tables.displayed.length === 1 ? <VerticalTable data={tableData}/> : null}
+                <VerticalTable entries={entries}/>
                 <div className="container-fluid">
                     <div className="row">
                         <div className="Element Chart col">
