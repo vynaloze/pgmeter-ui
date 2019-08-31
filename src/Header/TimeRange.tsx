@@ -4,44 +4,73 @@ import {connect} from "react-redux";
 import DateTimeRangeContainer from 'react-advanced-datetimerange-picker'
 import moment, {Moment} from "moment"
 import {AppState} from "../_store";
-import {setTimeRange} from "../_store/timeRange/actions";
+import {setDisplayedTimeRange, setTimeRange} from "../_store/timeRange/actions";
 import './TimeRange.css'
+import {TimeRangeState} from "../_store/timeRange/types";
+import {setLiveUpdates} from "../_store/updater/actions";
+import {UpdaterState} from "../_store/updater/types";
 
 interface StateFromProps {
-    start: Moment
-    end: Moment
+    state: TimeRangeState
+    updaterState: UpdaterState
 }
 
 interface DispatchFromProps {
-    setTimeRange: typeof setTimeRange
+    setActualTimeRange: typeof setTimeRange
+    setDisplayedTimeRange: typeof setDisplayedTimeRange
+    setLiveUpdates: typeof setLiveUpdates
 }
 
 type Props = StateFromProps & DispatchFromProps
 
 class TimeRange extends React.Component<Props> {
+    private interval?: NodeJS.Timer;
+
     constructor(props: any) {
         super(props);
         this.applyCallback = this.applyCallback.bind(this);
+        this.autoUpdate = this.autoUpdate.bind(this);
+    }
+
+    componentDidMount() {
+        this.interval = setInterval(() => this.autoUpdate(), 1000)
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.interval as NodeJS.Timer);
+    }
+
+    autoUpdate() {
+        if (this.props.updaterState.liveUpdates) {
+            this.props.setDisplayedTimeRange(this.props.state.displayedTimeRange.start.clone().add("second", 1),
+                this.props.state.displayedTimeRange.end.clone().add("second", 1));
+            // fixme for sure
+        }
     }
 
     applyCallback(startDate: Moment, endDate: Moment) {
-        this.props.setTimeRange(startDate, endDate)
+        // if endDate is not now (or almost now), stop the live updates
+        if (moment.duration(moment().diff(endDate)).asSeconds() > 1) {
+            this.props.setLiveUpdates(false);
+        }
+        this.props.setDisplayedTimeRange(startDate, endDate);
+        this.props.setActualTimeRange(startDate, endDate);
     }
 
     render() {
-        let ranges = {
-            "Last 15 min": [moment().subtract(15, "minute"), moment()],
-            "Last 30 min": [moment().subtract(30, "minute"), moment()],
-            "Last 1 hour": [moment().subtract(1, "hour"), moment()],
-            "Last 3 hours": [moment().subtract(3, "hour"), moment()],
-            "Last 12 hours": [moment().subtract(12, "hour"), moment()],
-            "Last 24 hours": [moment().subtract(24, "hour"), moment()],
-            "Last 2 days": [moment().subtract(2, "day"), moment()],
-            "Last 7 days": [moment().subtract(7, "day"), moment()],
-            "Last 30 days": [moment().subtract(30, "day"), moment()],
-            "Last 90 days": [moment().subtract(90, "day"), moment()],
-        };
-        let local = {
+        const ranges = {
+            // "Last 15 min": [this.state.now.clone().subtract(15, "minute"), this.state.now],
+            // "Last 30 min": [this.state.now.clone().subtract(30, "minute"), this.state.now],
+            // "Last 1 hour": [this.state.now.clone().subtract(1, "hour"), this.state.now],
+            // "Last 3 hours": [this.state.now.clone().subtract(3, "hour"), this.state.now],
+            // "Last 12 hours": [this.state.now.clone().subtract(12, "hour"), this.state.now],
+            // "Last 24 hours": [this.state.now.clone().subtract(24, "hour"), this.state.now],
+            // "Last 2 days": [this.state.now.clone().subtract(2, "day"), this.state.now],
+            // "Last 7 days": [this.state.now.clone().subtract(7, "day"), this.state.now],
+            // "Last 30 days": [this.state.now.clone().subtract(30, "day"), this.state.now],
+            // "Last 90 days": [this.state.now.clone().subtract(90, "day"), this.state.now],
+        }; //fixme - get rid of this shitty moment.js lib
+        const local = {
             "format": "DD-MM-YYYY HH:mm:ss",
             "sundayFirst": false
         };
@@ -49,16 +78,17 @@ class TimeRange extends React.Component<Props> {
             <div className="TimeRange horizontal">
                 <DateTimeRangeContainer
                     ranges={ranges}
-                    start={this.props.start}
-                    end={this.props.end}
+                    start={this.props.state.displayedTimeRange.start}
+                    end={this.props.state.displayedTimeRange.end}
                     local={local}
                     applyCallback={this.applyCallback}
                     autoApply={true}
                 >
                     <div className="click-area"/>
                 </DateTimeRangeContainer>
-                <input value={this.props.start.format(local.format) + " / " + this.props.end.format(local.format)}
-                       type="text" className="info-box" readOnly={true}/>
+                <input
+                    value={this.props.state.displayedTimeRange.start.format(local.format) + " / " + this.props.state.displayedTimeRange.end.format(local.format)}
+                    type="text" className="info-box" readOnly={true}/>
             </div>
         );
     }
@@ -66,12 +96,12 @@ class TimeRange extends React.Component<Props> {
 
 function mapStateToProps(state: AppState): StateFromProps {
     return {
-        start: state.timeRange.start,
-        end: state.timeRange.end,
+        state: state.timeRange,
+        updaterState: state.updater
     }
 }
 
 export default connect<StateFromProps, DispatchFromProps, {}, AppState>(
     mapStateToProps,
-    {setTimeRange}
+    {setActualTimeRange: setTimeRange, setDisplayedTimeRange: setDisplayedTimeRange, setLiveUpdates: setLiveUpdates}
 )(TimeRange);
