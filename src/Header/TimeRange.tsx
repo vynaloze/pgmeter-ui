@@ -8,6 +8,8 @@ import {setLiveUpdates} from "../_store/updater/actions";
 import {UpdaterState} from "../_store/updater/types";
 // @ts-ignore
 import DateTimeRangePicker from '@wojtekmaj/react-datetimerange-picker'
+// @ts-ignore
+import onClickOutside from "react-onclickoutside";
 
 interface StateFromProps {
     state: TimeRangeState
@@ -28,6 +30,8 @@ class TimeRange extends React.Component<Props> {
     constructor(props: any) {
         super(props);
         this.onChange = this.onChange.bind(this);
+        this.handleClickOutside = this.handleClickOutside.bind(this);
+
         // this.autoUpdate = this.autoUpdate.bind(this);
     }
 
@@ -49,8 +53,17 @@ class TimeRange extends React.Component<Props> {
 
     onChange(date: Array<Date>) {
         this.props.setDisplayedTimeRange(date[0], date[1]);
-        this.props.setActualTimeRange(date[0], date[1]);
+
     }
+
+    onRangePickerClicked() {
+        console.log("click") //todo open quick ranges
+    }
+
+    // don't delete me
+    handleClickOutside = () => {
+        this.props.setActualTimeRange(this.props.state.displayedTimeRange.start, this.props.state.displayedTimeRange.end);
+    };
 
     // applyCallback(startDate: Moment, endDate: Moment) {
     //     // if endDate is not now (or almost now), stop the live updates
@@ -62,25 +75,27 @@ class TimeRange extends React.Component<Props> {
     // }
 
     render() {
-        const ranges = {
-            // "Last 15 min": [this.state.now.clone().subtract(15, "minute"), this.state.now],
-            // "Last 30 min": [this.state.now.clone().subtract(30, "minute"), this.state.now],
-            // "Last 1 hour": [this.state.now.clone().subtract(1, "hour"), this.state.now],
-            // "Last 3 hours": [this.state.now.clone().subtract(3, "hour"), this.state.now],
-            // "Last 12 hours": [this.state.now.clone().subtract(12, "hour"), this.state.now],
-            // "Last 24 hours": [this.state.now.clone().subtract(24, "hour"), this.state.now],
-            // "Last 2 days": [this.state.now.clone().subtract(2, "day"), this.state.now],
-            // "Last 7 days": [this.state.now.clone().subtract(7, "day"), this.state.now],
-            // "Last 30 days": [this.state.now.clone().subtract(30, "day"), this.state.now],
-            // "Last 90 days": [this.state.now.clone().subtract(90, "day"), this.state.now],
-        }; //fixme - get rid of this shitty moment.js lib
+        // const ranges = {
+        // "Last 15 min": [this.state.now.clone().subtract(15, "minute"), this.state.now],
+        // "Last 30 min": [this.state.now.clone().subtract(30, "minute"), this.state.now],
+        // "Last 1 hour": [this.state.now.clone().subtract(1, "hour"), this.state.now],
+        // "Last 3 hours": [this.state.now.clone().subtract(3, "hour"), this.state.now],
+        // "Last 12 hours": [this.state.now.clone().subtract(12, "hour"), this.state.now],
+        // "Last 24 hours": [this.state.now.clone().subtract(24, "hour"), this.state.now],
+        // "Last 2 days": [this.state.now.clone().subtract(2, "day"), this.state.now],
+        // "Last 7 days": [this.state.now.clone().subtract(7, "day"), this.state.now],
+        // "Last 30 days": [this.state.now.clone().subtract(30, "day"), this.state.now],
+        // "Last 90 days": [this.state.now.clone().subtract(90, "day"), this.state.now],
+        // }; //fixme - implement quick ranges by myself
         return (
-            <div className="TimeRange">
+            <div className="TimeRange" onClick={this.onRangePickerClicked}>
                 <DateTimeRangePicker
                     calendarIcon={null}
                     clearIcon={null}
+                    disableClock={true}
                     format={"yyyy-MM-dd H:mm:ss"}
                     onChange={this.onChange}
+                    onCalendarClose={this.handleClickOutside}
                     value={[this.props.state.displayedTimeRange.start, this.props.state.displayedTimeRange.end]}
                 />
             </div>
@@ -98,4 +113,4 @@ function mapStateToProps(state: AppState): StateFromProps {
 export default connect<StateFromProps, DispatchFromProps, {}, AppState>(
     mapStateToProps,
     {setActualTimeRange: setTimeRange, setDisplayedTimeRange: setDisplayedTimeRange, setLiveUpdates: setLiveUpdates}
-)(TimeRange);
+)(onClickOutside(TimeRange));

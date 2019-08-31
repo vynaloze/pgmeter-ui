@@ -1,97 +1,56 @@
 .TimeRange {
-    width: 680px;
     height: 100%;
     position: relative;
 }
 
-.TimeRange .info-box {
-    width: 410px;
-}
+/* override style of date time range picker */
 
-.TimeRange .click-area {
+.TimeRange .react-datetimerange-picker {
     height: 100%;
-    width: 680px;
-    z-index: 2;
     position: absolute;
     top: 0;
-    left: 0;
-}
-
-/* override style of datetime range picker */
-
-.TimeRange .daterangepicker {
-    left: 5px !important;
-    top: 60px !important;
-    background: var(--bg-header)
-}
-
-
-.TimeRange .fromDateTimeContainer {
-    background-color: #fff;
-    color: #000;
-}
-
-.TimeRange .fromDateHourContainer, .activeNotifier {
-    background-color: var(--bg-header);
+    right: 0;
+    background-color: var(--bg-general);
+    border: none;
+    border-radius: 10px;
     color: var(--text);
+    padding: 0 20px;
+    z-index: 1;
+    font-size-adjust: 0.6;
 }
 
-.TimeRange .rangebuttonstyle {
-    background: var(--bg-header);
-    color: var(--text)
+.TimeRange .react-datetimerange-picker__wrapper {
+    border: none;
 }
 
-.TimeRange .rangeButtonSelectedStyle {
-    background: var(--bg-header);
-    color: var(--blue);
-    border-color: var(--blue);
-    outline: none !important;
+.TimeRange .react-datetimerange-picker__inputGroup__input {
+    color: var(--text) !important;
+    text-align: right;
 }
 
-.TimeRange .form-control {
-    background: var(--bg-header);
-    color: var(--text);
-    font-size-adjust: 0.5;
+.TimeRange .react-datetimerange-picker__inputGroup__year {
+    width: 36px !important;
 }
 
-.TimeRange .form-control:focus {
-    color: var(--blue);
-    border-color: var(--blue);
-    box-shadow: 0 0 0 .2rem rgba(55, 200, 240, .25);
+.TimeRange .react-datetimerange-picker__inputGroup__input--hasLeadingZero {
+    width: 9px !important;
 }
 
-.TimeRange .multipleContentOnLine {
-    outline: none !important;
+.TimeRange .react-datetimerange-picker__inputGroup__input .react-datetimerange-picker__inputGroup__month {
+    width: 18px !important;
 }
 
-/* Reset Select */
-.TimeRange .timeSelectContainer select {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    outline: 0;
-    box-shadow: none;
-    border: 0 !important;
-    background: var(--bg-header);
+.react-datetimerange-picker__inputGroup__month, .react-datetimerange-picker__inputGroup__day, .react-datetimerange-picker__inputGroup__hour, .react-datetimerange-picker__inputGroup__minute, .react-datetimerange-picker__inputGroup__second {
+    width: 18px !important;
 }
 
-/* Remove IE arrow */
-.TimeRange .timeSelectContainer select::-ms-expand {
-    display: none;
+.TimeRange .react-datetime-picker__inputGroup__divider {
+    width: 8px;
 }
 
-/* Custom Select */
-.TimeRange .timeSelectContainer select {
-    flex: 1;
-    padding: 0 .5em;
-    color: #fff;
-    cursor: pointer;
-    border: 2px solid #ced4da;
-    border-radius: .25rem;
-}
-
-.TimeRange .timeSelectContainer .applyButton {
-    background-color: var(--blue) !important;
-    border: 1px solid var(--blue);
-    color: var(--bg-general)
+.TimeRange .react-datetimerange-picker__range-divider {
+    width: 16px;
+    height: 50%;
+    align-self: center;
+    text-align: center;
 }
