@@ -37,3 +37,8 @@
     z-index: 1;
     font-size-adjust: 0.6;
 }
+
+.no-padding {
+    padding: 0 !important;
+    margin: 0 !important;
+}

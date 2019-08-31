@@ -1,4 +1,4 @@
-import {SET_LAST_UPDATE, SET_LIVE_UPDATES, UpdaterActions} from "./types";
+import {SET_LAST_UPDATE, SET_LIVE_UPDATES, SET_LOADING, UpdaterActions} from "./types";
 
 export const setLiveUpdates = (liveUpdates: boolean): UpdaterActions => ({
     type: SET_LIVE_UPDATES,
@@ -8,4 +8,9 @@ export const setLiveUpdates = (liveUpdates: boolean): UpdaterActions => ({
 export const setLastUpdate = (lastUpdate: Date): UpdaterActions => ({
     type: SET_LAST_UPDATE,
     payload: lastUpdate
+});
+
+export const setLoading = (loading: boolean): UpdaterActions => ({
+    type: SET_LOADING,
+    payload: loading
 });

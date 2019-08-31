@@ -1,8 +1,9 @@
-import {SET_LAST_UPDATE, SET_LIVE_UPDATES, UpdaterActions, UpdaterState} from "./types";
+import {SET_LAST_UPDATE, SET_LIVE_UPDATES, SET_LOADING, UpdaterActions, UpdaterState} from "./types";
 
 const initialState: UpdaterState = {
     liveUpdates: true,
-    lastUpdate: new Date()
+    lastUpdate: new Date(),
+    loading: false,
 };
 
 export function updaterReducer(state = initialState, action: UpdaterActions): UpdaterState {
@@ -14,6 +15,10 @@ export function updaterReducer(state = initialState, action: UpdaterActions): Up
         case SET_LAST_UPDATE:
             return Object.assign({}, state, {
                 lastUpdate: action.payload,
+            });
+        case SET_LOADING:
+            return Object.assign({}, state, {
+                loading: action.payload,
             });
         default:
             return state

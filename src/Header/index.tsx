@@ -15,10 +15,10 @@ function Header() {
                     <div className="col-6">
                         <Datasources/>
                     </div>
-                    <div className="col-5 align-right">
+                    <div className="col-4 align-right">
                         <TimeRange/>
                     </div>
-                    <div className="col-1 align-right">
+                    <div className="col-2 align-right">
                         <Updater/>
                     </div>
                 </div>

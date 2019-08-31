@@ -5,15 +5,14 @@ import {setDisplayedTimeRange, setTimeRange} from "../_store/timeRange/actions";
 import './TimeRange.css'
 import {TimeRangeState} from "../_store/timeRange/types";
 import {setLiveUpdates} from "../_store/updater/actions";
-import {UpdaterState} from "../_store/updater/types";
 // @ts-ignore
 import DateTimeRangePicker from '@wojtekmaj/react-datetimerange-picker'
 // @ts-ignore
 import onClickOutside from "react-onclickoutside";
+import {differenceInMilliseconds} from "date-fns";
 
 interface StateFromProps {
     state: TimeRangeState
-    updaterState: UpdaterState
 }
 
 interface DispatchFromProps {
@@ -52,6 +51,10 @@ class TimeRange extends React.Component<Props> {
     // }
 
     onChange(date: Array<Date>) {
+        // if end date is not now (or almost now), stop the live updates
+        if (differenceInMilliseconds(new Date(), date[1]) > 1000) {
+            this.props.setLiveUpdates(false);
+        }
         this.props.setDisplayedTimeRange(date[0], date[1]);
 
     }
@@ -64,15 +67,6 @@ class TimeRange extends React.Component<Props> {
     handleClickOutside = () => {
         this.props.setActualTimeRange(this.props.state.displayedTimeRange.start, this.props.state.displayedTimeRange.end);
     };
-
-    // applyCallback(startDate: Moment, endDate: Moment) {
-    //     // if endDate is not now (or almost now), stop the live updates
-    //     if (moment.duration(moment().diff(endDate)).asSeconds() > 1) {
-    //         this.props.setLiveUpdates(false);
-    //     }
-    //     this.props.setDisplayedTimeRange(startDate, endDate);
-    //     this.props.setActualTimeRange(startDate, endDate);
-    // }
 
     render() {
         // const ranges = {
@@ -106,7 +100,6 @@ class TimeRange extends React.Component<Props> {
 function mapStateToProps(state: AppState): StateFromProps {
     return {
         state: state.timeRange,
-        updaterState: state.updater
     }
 }
 
