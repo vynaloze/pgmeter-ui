@@ -17,7 +17,7 @@ import {QueriesState, QueriesTable, QueriesTableRow} from "../_store/stats/queri
 import {Series} from "../_store/stats/types";
 import TranslateRequest from "../ApiClient/body";
 import 'chartjs-plugin-colorschemes';
-import * as moment from "moment";
+import {fromUnixTime, getUnixTime} from "date-fns";
 import * as Utils from "./Utils";
 import StyledLineChart from "../StyledLineChart";
 
@@ -79,8 +79,8 @@ class Queries extends React.Component<Props, InternalState> {
         // time chart
         const timeChartRequest = {
             filter: {
-                timestampFrom: this.props.timeRange.start.unix(),
-                timestampTo: this.props.timeRange.end.unix(),
+                timestampFrom: getUnixTime(this.props.timeRange.start),
+                timestampTo: getUnixTime(this.props.timeRange.end),
                 type: "pg_stat_statements",
                 datasourceIds: this.props.datasources.selectedBackend.map(d => d.id)
             },
@@ -112,8 +112,8 @@ class Queries extends React.Component<Props, InternalState> {
         // calls chart
         const callsChartRequest = {
             filter: {
-                timestampFrom: this.props.timeRange.start.unix(),
-                timestampTo: this.props.timeRange.end.unix(),
+                timestampFrom: getUnixTime(this.props.timeRange.start),
+                timestampTo: getUnixTime(this.props.timeRange.end),
                 type: "pg_stat_statements",
                 datasourceIds: this.props.datasources.selectedBackend.map(d => d.id)
             },
@@ -228,7 +228,7 @@ class Queries extends React.Component<Props, InternalState> {
     }
 
     labelMapper(labels: Array<any>): Array<any> {
-        return labels.map(l => Utils.FormatTime(moment.unix(labels[0]), moment.unix(labels[labels.length - 1]), moment.unix(l)));
+        return labels.map(l => Utils.FormatTime(fromUnixTime(labels[0]), fromUnixTime(labels[labels.length - 1]), fromUnixTime(l)));
     }
 
     render() {

@@ -1,14 +1,13 @@
 import React from 'react';
 import {connect} from "react-redux";
-// @ts-ignore
-import DateTimeRangeContainer from 'react-advanced-datetimerange-picker'
-import moment, {Moment} from "moment"
 import {AppState} from "../_store";
 import {setDisplayedTimeRange, setTimeRange} from "../_store/timeRange/actions";
 import './TimeRange.css'
 import {TimeRangeState} from "../_store/timeRange/types";
 import {setLiveUpdates} from "../_store/updater/actions";
 import {UpdaterState} from "../_store/updater/types";
+// @ts-ignore
+import DateTimeRangePicker from '@wojtekmaj/react-datetimerange-picker'
 
 interface StateFromProps {
     state: TimeRangeState
@@ -28,34 +27,39 @@ class TimeRange extends React.Component<Props> {
 
     constructor(props: any) {
         super(props);
-        this.applyCallback = this.applyCallback.bind(this);
-        this.autoUpdate = this.autoUpdate.bind(this);
+        this.onChange = this.onChange.bind(this);
+        // this.autoUpdate = this.autoUpdate.bind(this);
     }
 
-    componentDidMount() {
-        this.interval = setInterval(() => this.autoUpdate(), 1000)
+    // componentDidMount() {
+    //     this.interval = setInterval(() => this.autoUpdate(), 1000)
+    // }
+    //
+    // componentWillUnmount() {
+    //     clearInterval(this.interval as NodeJS.Timer);
+    // }
+
+    // autoUpdate() {
+    //     if (this.props.updaterState.liveUpdates) {
+    //         this.props.setDisplayedTimeRange(this.props.state.displayedTimeRange.start.clone().add("second", 1),
+    //             this.props.state.displayedTimeRange.end.clone().add("second", 1));
+    //         // fixme for sure
+    //     }
+    // }
+
+    onChange(date: Array<Date>) {
+        this.props.setDisplayedTimeRange(date[0], date[1]);
+        this.props.setActualTimeRange(date[0], date[1]);
     }
 
-    componentWillUnmount() {
-        clearInterval(this.interval as NodeJS.Timer);
-    }
-
-    autoUpdate() {
-        if (this.props.updaterState.liveUpdates) {
-            this.props.setDisplayedTimeRange(this.props.state.displayedTimeRange.start.clone().add("second", 1),
-                this.props.state.displayedTimeRange.end.clone().add("second", 1));
-            // fixme for sure
-        }
-    }
-
-    applyCallback(startDate: Moment, endDate: Moment) {
-        // if endDate is not now (or almost now), stop the live updates
-        if (moment.duration(moment().diff(endDate)).asSeconds() > 1) {
-            this.props.setLiveUpdates(false);
-        }
-        this.props.setDisplayedTimeRange(startDate, endDate);
-        this.props.setActualTimeRange(startDate, endDate);
-    }
+    // applyCallback(startDate: Moment, endDate: Moment) {
+    //     // if endDate is not now (or almost now), stop the live updates
+    //     if (moment.duration(moment().diff(endDate)).asSeconds() > 1) {
+    //         this.props.setLiveUpdates(false);
+    //     }
+    //     this.props.setDisplayedTimeRange(startDate, endDate);
+    //     this.props.setActualTimeRange(startDate, endDate);
+    // }
 
     render() {
         const ranges = {
@@ -70,25 +74,15 @@ class TimeRange extends React.Component<Props> {
             // "Last 30 days": [this.state.now.clone().subtract(30, "day"), this.state.now],
             // "Last 90 days": [this.state.now.clone().subtract(90, "day"), this.state.now],
         }; //fixme - get rid of this shitty moment.js lib
-        const local = {
-            "format": "DD-MM-YYYY HH:mm:ss",
-            "sundayFirst": false
-        };
         return (
-            <div className="TimeRange horizontal">
-                <DateTimeRangeContainer
-                    ranges={ranges}
-                    start={this.props.state.displayedTimeRange.start}
-                    end={this.props.state.displayedTimeRange.end}
-                    local={local}
-                    applyCallback={this.applyCallback}
-                    autoApply={true}
-                >
-                    <div className="click-area"/>
-                </DateTimeRangeContainer>
-                <input
-                    value={this.props.state.displayedTimeRange.start.format(local.format) + " / " + this.props.state.displayedTimeRange.end.format(local.format)}
-                    type="text" className="info-box" readOnly={true}/>
+            <div className="TimeRange">
+                <DateTimeRangePicker
+                    calendarIcon={null}
+                    clearIcon={null}
+                    format={"yyyy-MM-dd H:mm:ss"}
+                    onChange={this.onChange}
+                    value={[this.props.state.displayedTimeRange.start, this.props.state.displayedTimeRange.end]}
+                />
             </div>
         );
     }

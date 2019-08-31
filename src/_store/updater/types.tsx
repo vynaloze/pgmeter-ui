@@ -1,8 +1,6 @@
-import {Moment} from "moment";
-
 export interface UpdaterState {
     liveUpdates: boolean
-    lastUpdate: Moment
+    lastUpdate: Date
 }
 
 export const SET_LIVE_UPDATES = "SET_LIVE_UPDATES";
@@ -15,7 +13,7 @@ export interface SetLiveUpdates {
 
 export interface SetLastUpdate {
     type: typeof SET_LAST_UPDATE
-    payload: Moment
+    payload: Date
 }
 
 export type UpdaterActions = SetLiveUpdates | SetLastUpdate

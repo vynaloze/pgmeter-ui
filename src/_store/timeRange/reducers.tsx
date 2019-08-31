@@ -1,13 +1,13 @@
-import moment from "moment";
+import {subDays} from "date-fns";
 import {SET_DISPLAYED_TIME_RANGE, SET_TIME_RANGE, TimeRangeActions, TimeRangeState} from "./types";
 
 const initialTimeRange: TimeRangeState = {
-    start: moment().subtract(90, "day"),
-    end: moment(),
+    start: subDays(new Date(), 90),
+    end: new Date(),
 
     displayedTimeRange: {
-        start: moment().subtract(90, "day"),
-        end: moment(),
+        start: subDays(new Date(), 90),
+        end: new Date(),
     },
 };
 

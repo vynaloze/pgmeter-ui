@@ -15,7 +15,7 @@ import StyledSelect from "../StyledSelect";
 import VerticalTable from "../VerticalTable";
 import StyledLineChart from "../StyledLineChart";
 import {Series} from "../_store/stats/types";
-import * as moment from "moment";
+import {fromUnixTime, getUnixTime} from "date-fns";
 
 interface StateFromProps {
     timeRange: TimeRangeState
@@ -176,8 +176,8 @@ class Indexes extends React.Component<Props, InternalState> {
         xyKeys.forEach((k: string) => {
             const req = {
                 filter: {
-                    timestampFrom: this.props.timeRange.start.unix(),
-                    timestampTo: this.props.timeRange.end.unix(),
+                    timestampFrom: getUnixTime(this.props.timeRange.start),
+                    timestampTo: getUnixTime(this.props.timeRange.end),
                     type: "pg_stat_user_indexes",
                     datasourceIds: this.props.datasources.selectedBackend.map(d => d.id)
                 },
@@ -234,7 +234,7 @@ class Indexes extends React.Component<Props, InternalState> {
     }
 
     labelMapper(labels: Array<any>): Array<any> {
-        return labels.map(l => Utils.FormatTime(moment.unix(labels[0]), moment.unix(labels[labels.length - 1]), moment.unix(l)));
+        return labels.map(l => Utils.FormatTime(fromUnixTime(labels[0]), fromUnixTime(labels[labels.length - 1]), fromUnixTime(l)));
     }
 
     formatIndexDisplayedName(dsId: number, table: string, index: string): string {

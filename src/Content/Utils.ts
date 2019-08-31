@@ -1,17 +1,17 @@
-import {Moment} from "moment";
+import {differenceInDays, differenceInMinutes, format} from "date-fns";
 import {Datasource} from "../_store/datasources/types";
 
-export function FormatTime(start: Moment, end: Moment, value: Moment): string {
-    if (end.diff(start, "minutes") < 15) {
-        return value.format("HH:mm:ss")
-    } else if (end.diff(start, "days") < 1) {
-        return value.format("HH:mm")
-    } else if (end.diff(start, "weeks") < 1) {
-        return value.format("DD-MM HH:mm")
-    } else if (end.diff(start, "months") < 1) {
-        return value.format("DD-MM")
+export function FormatTime(start: Date, end: Date, value: Date): string {
+    if (differenceInMinutes(end, start) < 15) {
+        return format(value, "HH:mm:ss")
+    } else if (differenceInDays(end, start) < 1) {
+        return format(value, "HH:mm")
+    } else if (differenceInDays(end, start) < 7) {
+        return format(value, "DD-MM HH:mm")
+    } else if (differenceInDays(end, start) < 30) {
+        return format(value, "DD-MM")
     } else {
-        return value.format("MM-YYYY")
+        return format(value, "MM-YYYY")
     }
 }
 

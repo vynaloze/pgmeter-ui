@@ -11,9 +11,7 @@
     "@types/react-redux": "^7.1.0",
     "@types/react-router-dom": "^4.3.4",
     "bootstrap": "^4.3.1",
-    "moment": "latest",
     "react": "^16.8.6",
-    "react-advanced-datetimerange-picker": "^0.1.12",
     "react-dom": "^16.8.6",
     "react-onclickoutside": "^6.8.0",
     "react-redux": "^7.1.0",
@@ -25,7 +23,10 @@
     "@types/react-table": "^6.8.4",
     "react-chartjs-2": "^2.7.6",
     "chart.js": "^2.8.0",
-    "chartjs-plugin-colorschemes": "^0.4.0"
+    "chartjs-plugin-colorschemes": "^0.4.0",
+    "react-switch": "^5.0.1",
+    "date-fns": "^2.0.1",
+    "@wojtekmaj/react-datetimerange-picker": "^2.3.0"
   },
   "scripts": {
     "start": "react-scripts start",

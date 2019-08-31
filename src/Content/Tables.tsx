@@ -3,14 +3,14 @@ import './index.css';
 import StyledSelect from "../StyledSelect";
 import {TimeRangeState} from "../_store/timeRange/types";
 import {DatasourceState} from "../_store/datasources/types";
-import {Table, TablesState, TablesTableEntry, TablesTablePayload} from "../_store/stats/tables/types";
+import {Table, TablesState, TablesTableEntry} from "../_store/stats/tables/types";
 import {setAllTables, setDisplayedTables, setTablesData} from '../_store/stats/tables/actions';
 import ApiClient from "../ApiClient";
 import {AppState} from "../_store";
 import {connect} from "react-redux";
 import TranslateRequest from "../ApiClient/body";
 import VerticalTable from "../VerticalTable";
-import moment from "moment"
+import {format, formatDistanceToNow, fromUnixTime, getUnixTime, isValid, parseISO} from "date-fns";
 import {Series} from "../_store/stats/types";
 import * as Utils from "./Utils";
 import StyledLineChart from "../StyledLineChart";
@@ -100,11 +100,28 @@ class Tables extends React.Component<Props, InternalState> {
                 let overview: Array<TablesTableEntry> = [];
                 response
                     .filter(((r: any) => this.props.datasources.selectedBackend.map((ds => ds.id)).includes(r.datasource.id)))
-                    .flatMap((r: any) => r.payload.map((p: TablesTablePayload) => ({
-                        ...p,
+                    .flatMap((r: any) => r.payload.map((p: any) => ({
+                        table: p.table,
+                        seq_scan: p.seq_scan,
+                        seq_tup_fetch: p.seq_tup_fetch,
+                        idx_scan: p.idx_scan,
+                        idx_tup_fetch: p.idx_tup_fetch,
+                        live_tup: p.live_tup,
+                        dead_tup: p.dead_tup,
+                        ins_tup: p.ins_tup,
+                        upd_tup: p.upd_tup,
+                        del_tup: p.del_tup,
+                        last_vacuum: parseISO(p.last_vacuum),
+                        last_autovacuum: parseISO(p.last_autovacuum),
+                        last_analyze: parseISO(p.last_analyze),
+                        last_autoanalyze: parseISO(p.last_autoanalyze),
+                        vacuum_count: p.vacuum_count,
+                        autovacuum_count: p.autovacuum_count,
+                        analyze_count: p.analyze_count,
+                        autoanalyze_count: p.autoanalyze_count,
                         datasourceId: r.datasource.id
-                    })))
-                    .forEach((p: any) => overview.push(p));
+                    }) as TablesTableEntry))
+                    .forEach((tte: TablesTableEntry) => overview.push(tte));
                 let data = this.props.tables.data;
                 data.overview = overview;
                 this.props.setTablesData(data);
@@ -119,8 +136,8 @@ class Tables extends React.Component<Props, InternalState> {
         xyKeys.forEach((k: string) => {
             const req = {
                 filter: {
-                    timestampFrom: this.props.timeRange.start.unix(),
-                    timestampTo: this.props.timeRange.end.unix(),
+                    timestampFrom: getUnixTime(this.props.timeRange.start),
+                    timestampTo: getUnixTime(this.props.timeRange.end),
                     type: "pg_stat_user_tables",
                     datasourceIds: this.props.datasources.selectedBackend.map(d => d.id)
                 },
@@ -173,7 +190,7 @@ class Tables extends React.Component<Props, InternalState> {
     }
 
     labelMapper(labels: Array<any>): Array<any> {
-        return labels.map(l => Utils.FormatTime(moment.unix(labels[0]), moment.unix(labels[labels.length - 1]), moment.unix(l)));
+        return labels.map(l => Utils.FormatTime(fromUnixTime(labels[0]), fromUnixTime(labels[labels.length - 1]), fromUnixTime(l)));
     }
 
     render() {
@@ -194,10 +211,22 @@ class Tables extends React.Component<Props, InternalState> {
                     "Index Cache Hits": "TODO",
                     "TOAST Cache Hits": "TODO",
                     "TOAST Index Cache Hits": "TODO",
-                    "Manual Vacuum": (t.vacuum_count || 0) + "" + (moment(t.last_vacuum).isValid() ? "; last at " + moment(t.last_vacuum).format("Do MMM YYYY, H:mm:ss") + " (" + moment(t.last_vacuum).fromNow() + ")" : ""),
-                    "Auto Vacuum": (t.autovacuum_count || 0) + "" + (moment(t.last_autovacuum).isValid() ? "; last at " + moment(t.last_autovacuum).format("Do MMM YYYY, H:mm:ss") + " (" + moment(t.last_autovacuum).fromNow() + ")" : ""),
-                    "Manual Analyze": (t.analyze_count || 0) + "" + (moment(t.last_analyze).isValid() ? "; last at " + moment(t.last_analyze).format("Do MMM YYYY, H:mm:ss") + " (" + moment(t.last_analyze).fromNow() + ")" : ""),
-                    "Auto Analyze": (t.autoanalyze_count || 0) + "" + (moment(t.last_autoanalyze).isValid() ? "; last at " + moment(t.last_autoanalyze).format("Do MMM YYYY, H:mm:ss") + " (" + moment(t.last_autoanalyze).fromNow() + ")" : ""),
+                    "Manual Vacuum": (t.vacuum_count || 0) + "" + (isValid(t.last_vacuum) ? "; last at " + format(t.last_vacuum, "do MMM yyyy, H:mm:ss") + " (" + formatDistanceToNow(t.last_vacuum, {
+                        includeSeconds: true,
+                        addSuffix: true
+                    }) + ")" : ""),
+                    "Auto Vacuum": (t.autovacuum_count || 0) + "" + (isValid(t.last_autovacuum) ? "; last at " + format(t.last_autovacuum, "do MMM yyyy, H:mm:ss") + " (" + formatDistanceToNow(t.last_autovacuum, {
+                        includeSeconds: true,
+                        addSuffix: true
+                    }) + ")" : ""),
+                    "Manual Analyze": (t.analyze_count || 0) + "" + (isValid(t.last_analyze) ? "; last at " + format(t.last_analyze, "do MMM yyyy, H:mm:ss") + " (" + formatDistanceToNow(t.last_analyze, {
+                        includeSeconds: true,
+                        addSuffix: true
+                    }) + ")" : ""),
+                    "Auto Analyze": (t.autoanalyze_count || 0) + "" + (isValid(t.last_autoanalyze) ? "; last at " + format(t.last_autoanalyze, "do MMM yyyy, H:mm:ss") + " (" + formatDistanceToNow(t.last_autoanalyze, {
+                        includeSeconds: true,
+                        addSuffix: true
+                    }) + ")" : ""),
                 };
                 return {key, data};
             });

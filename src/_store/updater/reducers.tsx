@@ -1,9 +1,8 @@
-import moment from "moment";
 import {SET_LAST_UPDATE, SET_LIVE_UPDATES, UpdaterActions, UpdaterState} from "./types";
 
 const initialState: UpdaterState = {
     liveUpdates: true,
-    lastUpdate: moment()
+    lastUpdate: new Date()
 };
 
 export function updaterReducer(state = initialState, action: UpdaterActions): UpdaterState {

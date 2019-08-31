@@ -1,12 +1,10 @@
-import {Moment} from "moment";
-
 export interface TimeRangeState extends TimeRange {
     displayedTimeRange: TimeRange
 }
 
 export interface TimeRange {
-    start: Moment
-    end: Moment
+    start: Date
+    end: Date
 }
 
 export const SET_TIME_RANGE = "SET_TIME_RANGE";

@@ -1,11 +1,11 @@
-import {Moment} from "moment";
+import {getUnixTime} from "date-fns";
 import TranslateRequest from "./body";
 
 export default class ApiClient {
     private static readonly API_ENDPOINT = "http://localhost:3000/api";
 
-    static getDatasources(from: Moment, to: Moment, onSuccess: ((response: any) => void), onError?: ((error: any) => void)) {
-        this.performGet(this.API_ENDPOINT + "/ds/" + from.unix() + "/" + to.unix(),
+    static getDatasources(from: Date, to: Date, onSuccess: ((response: any) => void), onError?: ((error: any) => void)) {
+        this.performGet(this.API_ENDPOINT + "/ds/" + getUnixTime(from) + "/" + getUnixTime(to),
             onSuccess,
             onError);
     }
