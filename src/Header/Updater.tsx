@@ -59,7 +59,7 @@ class Updater extends React.Component<Props> {
                     <div className="col">
                         {this.props.state.loading > 0 ?
                             <svg className="i-reload float-right" viewBox="0 0 32 32" width="24" height="24" fill="none"
-                                 stroke="currentcolor" strokeLinecap="round" stroke-linejoin="round" strokeWidth="2">
+                                 stroke="currentcolor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2">
                                 <path
                                     d="M29 16 C29 22 24 29 16 29 8 29 3 22 3 16 3 10 8 3 16 3 21 3 25 6 27 9 M20 10 L27 9 28 2"/>
                             </svg>

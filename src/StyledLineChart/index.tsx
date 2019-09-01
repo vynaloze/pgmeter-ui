@@ -76,7 +76,15 @@ export default class StyledLineChart extends React.Component<Props, {}> {
                                   scheme: 'brewer.DarkTwo8',
                                   custom: shiftFirstColorForSingleTable,
                               }
-                          }
+                          },
+                          // disable animations for major performance gain
+                          animation: {
+                              duration: 0 // general animation time
+                          },
+                          hover: {
+                              animationDuration: 0 // duration of animations when hovering an item
+                          },
+                          responsiveAnimationDuration: 0 // animation duration after a resize
                       }}/>)
     }
 }
