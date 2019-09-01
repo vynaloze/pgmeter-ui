@@ -1,9 +1,16 @@
-import {SET_LAST_UPDATE, SET_LIVE_UPDATES, SET_LOADING, UpdaterActions, UpdaterState} from "./types";
+import {
+    DECREMENT_LOADING,
+    INCREMENT_LOADING,
+    SET_LAST_UPDATE,
+    SET_LIVE_UPDATES,
+    UpdaterActions,
+    UpdaterState
+} from "./types";
 
 const initialState: UpdaterState = {
     liveUpdates: true,
-    lastUpdate: new Date(),
-    loading: false,
+    lastUpdate: undefined,
+    loading: 0,
 };
 
 export function updaterReducer(state = initialState, action: UpdaterActions): UpdaterState {
@@ -16,9 +23,13 @@ export function updaterReducer(state = initialState, action: UpdaterActions): Up
             return Object.assign({}, state, {
                 lastUpdate: action.payload,
             });
-        case SET_LOADING:
+        case INCREMENT_LOADING:
             return Object.assign({}, state, {
-                loading: action.payload,
+                loading: state.loading + 1,
+            });
+        case DECREMENT_LOADING:
+            return Object.assign({}, state, {
+                loading: state.loading - 1,
             });
         default:
             return state

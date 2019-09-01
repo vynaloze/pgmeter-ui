@@ -37,16 +37,9 @@ interface DispatchFromProps {
 
 type Props = StateFromProps & DispatchFromProps
 
-interface InternalState {
-    error: string | null
-}
-
-class Queries extends React.Component<Props, InternalState> {
+class Queries extends React.Component<Props> {
     constructor(props: Props) {
         super(props);
-        this.state = {
-            error: null
-        };
         this.renderTable = this.renderTable.bind(this);
         this.datasetFilter = this.datasetFilter.bind(this);
         this.datasetMapper = this.datasetMapper.bind(this);
@@ -234,7 +227,6 @@ class Queries extends React.Component<Props, InternalState> {
     render() {
         return (
             <div className="Content container-fluid">
-                {this.state.error != null ? <div className="Element Error">{this.state.error}</div> : null}
                 <div className="Element Table">
                     {this.renderTable()}
                 </div>

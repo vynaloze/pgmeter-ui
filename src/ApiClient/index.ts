@@ -1,5 +1,7 @@
 import {getUnixTime} from "date-fns";
 import TranslateRequest from "./body";
+import store from '../_store'
+import {decrementLoading, incrementLoading, setLastUpdate} from '../_store/updater/actions'
 
 export default class ApiClient {
     private static readonly API_ENDPOINT = "http://localhost:3000/api";
@@ -24,15 +26,21 @@ export default class ApiClient {
     }
 
     private static performGet(url: string, onSuccess: ((response: any) => void), onError?: ((error: any) => void)) {
+        store.dispatch(incrementLoading());
         fetch(url)
             .then(res => res.json())
             .then(
-                (result) => onSuccess(result),
+                (result) => {
+                    onSuccess(result);
+                    store.dispatch(setLastUpdate(new Date()));
+                },
                 (error) => onError ? onError(error) : null
             )
+            .finally(() => store.dispatch(decrementLoading()))
     }
 
     private static performPost(url: string, body: BodyInit, onSuccess: ((response: any) => void), onError?: ((error: any) => void)) {
+        store.dispatch(incrementLoading());
         fetch(url, {
             method: 'POST',
             headers: {
@@ -43,8 +51,12 @@ export default class ApiClient {
         })
             .then(res => res.json())
             .then(
-                (result) => onSuccess(result),
+                (result) => {
+                    onSuccess(result);
+                    store.dispatch(setLastUpdate(new Date()));
+                },
                 (error) => onError ? onError(error) : null
             )
+            .finally(() => store.dispatch(decrementLoading()))
     }
 }

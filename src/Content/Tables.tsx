@@ -14,11 +14,13 @@ import {format, formatDistanceToNow, fromUnixTime, getUnixTime, isValid, parseIS
 import {Series} from "../_store/stats/types";
 import * as Utils from "./Utils";
 import StyledLineChart from "../StyledLineChart";
+import {UpdaterState} from "../_store/updater/types";
 
 interface StateFromProps {
     timeRange: TimeRangeState
     datasources: DatasourceState
     tables: TablesState
+    updater: UpdaterState
 }
 
 interface DispatchFromProps {
@@ -29,18 +31,9 @@ interface DispatchFromProps {
 
 type Props = StateFromProps & DispatchFromProps
 
-interface InternalState {
-    error: string | null
-    loading: boolean
-}
-
-class Tables extends React.Component<Props, InternalState> {
+class Tables extends React.Component<Props> {
     constructor(props: Props) {
         super(props);
-        this.state = {
-            error: null,
-            loading: false
-        };
         this.handleTableSelection = this.handleTableSelection.bind(this);
         this.datasetFilter = this.datasetFilter.bind(this);
         this.datasetMapper = this.datasetMapper.bind(this);
@@ -54,14 +47,12 @@ class Tables extends React.Component<Props, InternalState> {
         }
     }
 
-    componentDidUpdate(prevProps: Readonly<StateFromProps & DispatchFromProps>, prevState: Readonly<InternalState>, snapshot?: any): void {
+    componentDidUpdate(prevProps: Readonly<StateFromProps & DispatchFromProps>, prevState: any, snapshot?: any): void {
         if (Utils.SelectedDatasourcesHaveChanged(this.props.datasources.selected, prevProps.datasources.selected)) {
             this.props.setTablesData({overview: [], charts: {}});
             if (this.props.datasources.selected.length > 0) {
-                this.setState({loading: true});
                 this.fetchTables();
                 this.fetchTableData();
-                this.setState({loading: false});
             } else {
                 this.props.setDisplayedTables([]);
                 this.props.setAllTables([]);
@@ -84,9 +75,10 @@ class Tables extends React.Component<Props, InternalState> {
                 this.props.setAllTables(tables);
                 this.props.setDisplayedTables(tables.filter(t => this.props.tables.displayed.some(
                     t2 => t2.label === t.label && t2.datasourceId === t.datasourceId)));
-                this.setState({error: null})
             }),
-            (error => this.setState({error: "Error fetching tables: " + error.toString()})));
+            (error => {
+                //todo error handling
+            }));
     }
 
     fetchTableData() {
@@ -125,9 +117,10 @@ class Tables extends React.Component<Props, InternalState> {
                 let data = this.props.tables.data;
                 data.overview = overview;
                 this.props.setTablesData(data);
-                this.setState({error: null})
             }),
-            (error => this.setState({error: "Error fetching data: " + error.toString()})));
+            (error => {
+                //todo error handling
+            }));
     }
 
     fetchChartData() {
@@ -165,9 +158,10 @@ class Tables extends React.Component<Props, InternalState> {
                     // @ts-ignore
                     data.charts[k] = response;
                     this.props.setTablesData(data);
-                    this.setState({error: null})
                 }),
-                (error => this.setState({error: "Error fetching data: " + error.toString()})));
+                (error => {
+                    //todo error handling
+                }));
         })
     }
 
@@ -240,7 +234,7 @@ class Tables extends React.Component<Props, InternalState> {
                                 all={this.props.tables.all || undefined}
                                 selected={this.props.tables.displayed || undefined}
                                 placeholder={"Pick table..."}
-                                loading={this.state.loading}
+                                loading={this.props.updater.loading > 0}
                                 withGrouping={this.props.datasources.selected.length > 1}
                                 handleChange={this.handleTableSelection}
                             />
@@ -416,7 +410,8 @@ function mapStateToProps(state: AppState): StateFromProps {
     return {
         timeRange: state.timeRange,
         datasources: state.datasources,
-        tables: state.stats.tables
+        tables: state.stats.tables,
+        updater: state.updater,
     }
 }
 

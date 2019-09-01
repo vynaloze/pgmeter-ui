@@ -23,32 +23,22 @@ interface DispatchFromProps {
 
 type Props = StateFromProps & DispatchFromProps
 
-class TimeRange extends React.Component<Props> {
-    private interval?: NodeJS.Timer;
+interface InternalState {
+    focusedOnBox: boolean
+}
 
+
+class TimeRange extends React.Component<Props, InternalState> {
     constructor(props: any) {
         super(props);
+        this.state = {
+            focusedOnBox: false
+        };
         this.onChange = this.onChange.bind(this);
         this.handleClickOutside = this.handleClickOutside.bind(this);
-
-        // this.autoUpdate = this.autoUpdate.bind(this);
+        this.onRangePickerClicked = this.onRangePickerClicked.bind(this);
+        this.onRangePickerClosed = this.onRangePickerClosed.bind(this);
     }
-
-    // componentDidMount() {
-    //     this.interval = setInterval(() => this.autoUpdate(), 1000)
-    // }
-    //
-    // componentWillUnmount() {
-    //     clearInterval(this.interval as NodeJS.Timer);
-    // }
-
-    // autoUpdate() {
-    //     if (this.props.updaterState.liveUpdates) {
-    //         this.props.setDisplayedTimeRange(this.props.state.displayedTimeRange.start.clone().add("second", 1),
-    //             this.props.state.displayedTimeRange.end.clone().add("second", 1));
-    //         // fixme for sure
-    //     }
-    // }
 
     onChange(date: Array<Date>) {
         // if end date is not now (or almost now), stop the live updates
@@ -56,16 +46,28 @@ class TimeRange extends React.Component<Props> {
             this.props.setLiveUpdates(false);
         }
         this.props.setDisplayedTimeRange(date[0], date[1]);
-
     }
 
     onRangePickerClicked() {
+        this.setState({
+            focusedOnBox: true
+        });
+        this.props.setLiveUpdates(false);
         console.log("click") //todo open quick ranges
+    }
+
+    onRangePickerClosed() {
+        if (this.state.focusedOnBox) {
+            this.props.setActualTimeRange(this.props.state.displayedTimeRange.start, this.props.state.displayedTimeRange.end);
+            this.setState({
+                focusedOnBox: false
+            });
+        }
     }
 
     // don't delete me
     handleClickOutside = () => {
-        this.props.setActualTimeRange(this.props.state.displayedTimeRange.start, this.props.state.displayedTimeRange.end);
+        this.onRangePickerClosed();
     };
 
     render() {
@@ -89,7 +91,7 @@ class TimeRange extends React.Component<Props> {
                     disableClock={true}
                     format={"yyyy-MM-dd H:mm:ss"}
                     onChange={this.onChange}
-                    onCalendarClose={this.handleClickOutside}
+                    onCalendarClose={this.onRangePickerClosed}
                     value={[this.props.state.displayedTimeRange.start, this.props.state.displayedTimeRange.end]}
                 />
             </div>

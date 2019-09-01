@@ -16,12 +16,14 @@ import VerticalTable from "../VerticalTable";
 import StyledLineChart from "../StyledLineChart";
 import {Series} from "../_store/stats/types";
 import {fromUnixTime, getUnixTime} from "date-fns";
+import {UpdaterState} from "../_store/updater/types";
 
 interface StateFromProps {
     timeRange: TimeRangeState
     datasources: DatasourceState
     tables: TablesState
     indexes: IndexesState
+    updater: UpdaterState
 }
 
 interface DispatchFromProps {
@@ -34,18 +36,9 @@ interface DispatchFromProps {
 
 type Props = StateFromProps & DispatchFromProps
 
-interface InternalState {
-    error: string | null
-    loading: boolean
-}
-
-class Indexes extends React.Component<Props, InternalState> {
+class Indexes extends React.Component<Props> {
     constructor(props: Props) {
         super(props);
-        this.state = {
-            error: null,
-            loading: false
-        };
         this.handleTableSelection = this.handleTableSelection.bind(this);
         this.handleIndexSelection = this.handleIndexSelection.bind(this);
         this.datasetFilter = this.datasetFilter.bind(this);
@@ -64,12 +57,10 @@ class Indexes extends React.Component<Props, InternalState> {
         }
     }
 
-    componentDidUpdate(prevProps: Readonly<StateFromProps & DispatchFromProps>, prevState: Readonly<InternalState>, snapshot?: any): void {
+    componentDidUpdate(prevProps: Readonly<StateFromProps & DispatchFromProps>, prevState: Readonly<any>, snapshot?: any): void {
         if (Utils.SelectedDatasourcesHaveChanged(this.props.datasources.selected, prevProps.datasources.selected)) {
             if (this.props.datasources.selected.length > 0) {
-                this.setState({loading: true});
                 this.fetchTables();
-                this.setState({loading: false});
             } else {
                 this.props.setDisplayedTables([]);
                 this.props.setAllTables([]);
@@ -79,10 +70,8 @@ class Indexes extends React.Component<Props, InternalState> {
         if (this.selectedTablesHaveChanged(prevProps.tables.displayed)) {
             this.props.setIndexesData({overview: [], charts: {}});
             if (this.props.tables.displayed.length > 0) {
-                this.setState({loading: true});
                 this.fetchIndexes();
                 this.fetchIndexData();
-                this.setState({loading: false});
             } else {
                 this.props.setDisplayedIndexes([]);
                 this.props.setAllIndexes([]);
@@ -115,9 +104,10 @@ class Indexes extends React.Component<Props, InternalState> {
                 this.props.setAllTables(tables);
                 this.props.setDisplayedTables(tables.filter(t => this.props.tables.displayed.some(
                     t2 => t2.label === t.label && t2.datasourceId === t.datasourceId)));
-                this.setState({error: null})
             }),
-            (error => this.setState({error: "Error fetching indexes: " + error.toString()})));
+            (error => {
+                //todo error handling
+            }));
     }
 
     fetchIndexes() {
@@ -142,9 +132,10 @@ class Indexes extends React.Component<Props, InternalState> {
                 this.props.setAllIndexes(filteredIndexes);
                 this.props.setDisplayedIndexes(filteredIndexes.filter(i => this.props.indexes.displayed.some(
                     i2 => i2.label === i.label && i2.datasourceId === i.datasourceId && i2.table === i.table)));
-                this.setState({error: null})
             }),
-            (error => this.setState({error: "Error fetching indexes: " + error.toString()})));
+            (error => {
+                //todo error handling
+            }));
     }
 
     fetchIndexData() {
@@ -166,9 +157,10 @@ class Indexes extends React.Component<Props, InternalState> {
                 let data = this.props.indexes.data;
                 data.overview = overview;
                 this.props.setIndexesData(data);
-                this.setState({error: null})
             }),
-            (error => this.setState({error: "Error fetching data: " + error.toString()})));
+            (error => {
+                //todo error handling
+            }));
     }
 
     fetchChartData() {
@@ -208,9 +200,10 @@ class Indexes extends React.Component<Props, InternalState> {
                     // @ts-ignore
                     data.charts[k] = response;
                     this.props.setIndexesData(data);
-                    this.setState({error: null})
                 }),
-                (error => this.setState({error: "Error fetching data: " + error.toString()})));
+                (error => {
+                    //todo error handling
+                }));
         })
     }
 
@@ -274,7 +267,7 @@ class Indexes extends React.Component<Props, InternalState> {
                                 all={this.props.tables.all || undefined}
                                 selected={this.props.tables.displayed || undefined}
                                 placeholder={"Pick table..."}
-                                loading={this.state.loading}
+                                loading={this.props.updater.loading > 0}
                                 withGrouping={this.props.datasources.selected.length > 1}
                                 handleChange={this.handleTableSelection}
                             />
@@ -284,7 +277,7 @@ class Indexes extends React.Component<Props, InternalState> {
                                 all={this.props.indexes.all || undefined}
                                 selected={this.props.indexes.displayed || undefined}
                                 placeholder={"Pick index..."}
-                                loading={this.state.loading}
+                                loading={this.props.updater.loading > 0}
                                 withGrouping={this.props.tables.displayed.length > 1}
                                 handleChange={this.handleIndexSelection}
                             />
@@ -325,6 +318,7 @@ function mapStateToProps(state: AppState): StateFromProps {
         datasources: state.datasources,
         tables: state.stats.tables,
         indexes: state.stats.indexes,
+        updater: state.updater,
     }
 }
 

@@ -25,22 +25,13 @@ interface DispatchFromProps {
 
 type Props = StateFromProps & DispatchFromProps
 
-interface InternalState {
-    error: string | null
-    loading: boolean
-}
-
 interface SystemTypes {
     [type: string]: Array<string>
 }
 
-export class System extends React.Component<Props, InternalState> {
+export class System extends React.Component<Props> {
     constructor(props: Props) {
         super(props);
-        this.state = {
-            error: null,
-            loading: false
-        };
         this.datasetFilter = this.datasetFilter.bind(this);
         this.datasetMapper = this.datasetMapper.bind(this);
         this.labelMapper = this.labelMapper.bind(this);
@@ -50,7 +41,7 @@ export class System extends React.Component<Props, InternalState> {
         this.fetchData()
     }
 
-    componentDidUpdate(prevProps: Props, prevState: InternalState, snapshot: any) {
+    componentDidUpdate(prevProps: Props, prevState: any, snapshot: any) {
         if (Utils.SelectedDatasourcesHaveChanged(this.props.datasources.selected, prevProps.datasources.selected)) {
             this.fetchData()
         }

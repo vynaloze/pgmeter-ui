@@ -1,4 +1,5 @@
 .i-reload {
+    padding: 0;
     animation: spin 1300ms infinite;
 }
 
@@ -22,14 +23,14 @@
     }
 }
 
-.v-align {
-    vertical-align: text-top;
-}
-
 .small-text {
     padding: 4px 0 0 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     font-size-adjust: 0.4;
+}
+
+.live-text {
+    padding: 2px 0 0 8px;
 }

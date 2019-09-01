@@ -12,10 +12,12 @@ import './Datasources.css'
 import ApiClient from "../ApiClient";
 import StyledSelect from "../StyledSelect";
 import {TimeRangeState} from "../_store/timeRange/types";
+import {UpdaterState} from "../_store/updater/types";
 
 interface StateFromProps {
     timeRange: TimeRangeState
     datasources: DatasourceState
+    updater: UpdaterState
 }
 
 interface DispatchFromProps {
@@ -27,18 +29,9 @@ interface DispatchFromProps {
 
 type Props = StateFromProps & DispatchFromProps
 
-interface InternalState {
-    error: any
-    loading: boolean
-}
-
-class Datasources extends React.Component<Props, InternalState> {
+class Datasources extends React.Component<Props> {
     constructor(props: Props) {
         super(props);
-        this.state = {
-            error: null,
-            loading: true,
-        };
         this.handleChange = this.handleChange.bind(this);
         this.updateDatasources = this.updateDatasources.bind(this);
     }
@@ -47,41 +40,38 @@ class Datasources extends React.Component<Props, InternalState> {
         this.fetchDatasources()
     }
 
-    componentDidUpdate(prevProps: Props, prevState: InternalState, snapshot: any) {
+    componentDidUpdate(prevProps: Props, prevState: any, snapshot: any) {
         if (prevProps.timeRange.start !== this.props.timeRange.start || prevProps.timeRange.end !== this.props.timeRange.end) {
             this.fetchDatasources()
         }
     }
 
     fetchDatasources() {
-        this.setState({
-            loading: true,
-            error: null,
-        });
-
         ApiClient.getDatasources(this.props.timeRange.start, this.props.timeRange.end,
             this.updateDatasources,
             (error) => {
-                this.setState({
-                    loading: false,
-                    error
-                });
+                // todo onError
             });
     }
 
     updateDatasources(result: any) {
         this.props.setBackendDatasources(result);
-        let all = toDatasources(result, this.props.datasources.labelTemplate);
-        let oldSelected = this.props.datasources.selected.flatMap(s => s.representedBy);
-        let selected = all.filter(ds => ds.representedBy.some(d => oldSelected.includes(d)));
+        const all = toDatasources(result, this.props.datasources.labelTemplate);
+        const oldSelected = this.props.datasources.selected.flatMap(s => s.representedBy);
+        const selected = all.filter(ds => ds.representedBy.some(d => oldSelected.includes(d)));
+
+        // console.log(result);
+        // console.log(all);
+        // console.log(oldSelected);
+        // console.log(selected);
+
         this.props.setDatasources(all);
         this.props.setSelectedDatasources(selected);
-        this.setState({
-            loading: false
-        });
     }
 
     handleChange(selected: Array<Datasource>) {
+        console.log(selected);
+
         this.props.setSelectedDatasources(selected);
         this.props.setSelectedBackendDatasources(toBackendDatasources(selected));
     }
@@ -92,7 +82,7 @@ class Datasources extends React.Component<Props, InternalState> {
                 all={this.props.datasources.all}
                 selected={this.props.datasources.selected}
                 placeholder={"Pick datasources..."}
-                loading={this.state.loading}
+                loading={this.props.updater.loading > 0}
                 handleChange={this.handleChange}
             />
         </div>
@@ -167,6 +157,7 @@ function mapStateToProps(state: AppState): StateFromProps {
     return {
         timeRange: state.timeRange,
         datasources: state.datasources,
+        updater: state.updater,
     }
 }
 
