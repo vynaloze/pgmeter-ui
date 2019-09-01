@@ -1,5 +1,6 @@
 import {differenceInDays, differenceInMinutes, format} from "date-fns";
 import {Datasource} from "../_store/datasources/types";
+import {TimeRange} from "../_store/timeRange/types";
 
 export function FormatTime(start: Date, end: Date, value: Date): string {
     if (differenceInMinutes(end, start) < 15) {
@@ -7,11 +8,11 @@ export function FormatTime(start: Date, end: Date, value: Date): string {
     } else if (differenceInDays(end, start) < 1) {
         return format(value, "HH:mm")
     } else if (differenceInDays(end, start) < 7) {
-        return format(value, "DD-MM HH:mm")
+        return format(value, "dd-MM HH:mm")
     } else if (differenceInDays(end, start) < 30) {
-        return format(value, "DD-MM")
+        return format(value, "dd-MM")
     } else {
-        return format(value, "MM-YYYY")
+        return format(value, "MM-yyyy")
     }
 }
 
@@ -26,4 +27,8 @@ export function SelectedDatasourcesHaveChanged(datasources1: Array<Datasource>, 
     const ids1 = datasources1.map(ds => ds.id);
     const ids2 = datasources2.map(ds => ds.id);
     return !(ids1.every(id => ids2.includes(id)) && ids2.every(id => ids1.includes(id)));
+}
+
+export function SelectedTimeRangeHasChanged(range1: TimeRange, range2: TimeRange): boolean {
+    return range1.start !== range2.start || range1.end !== range2.end;
 }

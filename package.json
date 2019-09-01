@@ -26,7 +26,8 @@
     "chartjs-plugin-colorschemes": "^0.4.0",
     "react-switch": "^5.0.1",
     "date-fns": "^2.0.1",
-    "@wojtekmaj/react-datetimerange-picker": "^2.3.0"
+    "@wojtekmaj/react-datetimerange-picker": "^2.3.0",
+    "reconnecting-eventsource": "^1.0.2"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -48,6 +49,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "proxy": "http://localhost:8080/"
+  }
 }

@@ -20,12 +20,14 @@ import 'chartjs-plugin-colorschemes';
 import {fromUnixTime, getUnixTime} from "date-fns";
 import * as Utils from "./Utils";
 import StyledLineChart from "../StyledLineChart";
+import {UpdaterState} from "../_store/updater/types";
 
 
 interface StateFromProps {
     timeRange: TimeRangeState
     datasources: DatasourceState
     queries: QueriesState
+    updater: UpdaterState
 }
 
 interface DispatchFromProps {
@@ -38,21 +40,65 @@ interface DispatchFromProps {
 type Props = StateFromProps & DispatchFromProps
 
 class Queries extends React.Component<Props> {
+    private eventSource?: EventSource;
+
     constructor(props: Props) {
         super(props);
         this.renderTable = this.renderTable.bind(this);
         this.datasetFilter = this.datasetFilter.bind(this);
         this.datasetMapper = this.datasetMapper.bind(this);
         this.labelMapper = this.labelMapper.bind(this);
+        this.subscribe = this.subscribe.bind(this);
+        this.unsubscribe = this.unsubscribe.bind(this);
     }
 
     componentDidMount(): void {
-        this.fetchData()
+        this.fetchData();
+        if (this.props.updater.liveUpdates) {
+            this.subscribe()
+        }
     }
 
     componentDidUpdate(prevProps: Props, prevState: any, snapshot: any) {
-        if (Utils.SelectedDatasourcesHaveChanged(this.props.datasources.selected, prevProps.datasources.selected)) {
-            this.fetchData()
+        if (Utils.SelectedDatasourcesHaveChanged(this.props.datasources.selected, prevProps.datasources.selected)
+            || Utils.SelectedTimeRangeHasChanged(this.props.timeRange, prevProps.timeRange)) {
+            this.unsubscribe();
+            this.fetchData();
+            if (this.props.updater.liveUpdates) {
+                this.subscribe()
+            }
+        }
+        if (prevProps.updater.liveUpdates && !this.props.updater.liveUpdates) {
+            this.unsubscribe()
+        }
+        if (!prevProps.updater.liveUpdates && this.props.updater.liveUpdates) {
+            this.subscribe()
+        }
+    }
+
+    componentWillUnmount(): void {
+        this.unsubscribe()
+    }
+
+    subscribe() {
+        const ids = this.props.datasources.selectedBackend.map(bds => bds.id);
+        if (ids.length === 0) {
+            return;
+        }
+        const types = ["pg_stat_statements"];
+        this.eventSource = ApiClient.subscribe(ids, types);
+        this.eventSource.addEventListener("message", e => {
+            const event = JSON.parse(e.data);
+            if (!event.ignored) {
+                this.fetchData();
+            }
+        });
+    }
+
+    unsubscribe() {
+        if (this.eventSource !== undefined) {
+            this.eventSource.close();
+            this.eventSource = undefined;
         }
     }
 
@@ -262,7 +308,8 @@ function mapStateToProps(state: AppState): StateFromProps {
     return {
         timeRange: state.timeRange,
         datasources: state.datasources,
-        queries: state.stats.queries
+        queries: state.stats.queries,
+        updater: state.updater,
     }
 }
 

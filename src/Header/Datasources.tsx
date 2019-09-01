@@ -57,21 +57,13 @@ class Datasources extends React.Component<Props> {
     updateDatasources(result: any) {
         this.props.setBackendDatasources(result);
         const all = toDatasources(result, this.props.datasources.labelTemplate);
-        const oldSelected = this.props.datasources.selected.flatMap(s => s.representedBy);
-        const selected = all.filter(ds => ds.representedBy.some(d => oldSelected.includes(d)));
-
-        // console.log(result);
-        // console.log(all);
-        // console.log(oldSelected);
-        // console.log(selected);
-
+        const oldSelectedIds = this.props.datasources.selected.flatMap(s => s.representedBy).map(bds => bds.id);
+        const selected = all.filter(ds => ds.representedBy.map(bds => bds.id).some(id => oldSelectedIds.includes(id)));
         this.props.setDatasources(all);
         this.props.setSelectedDatasources(selected);
     }
 
     handleChange(selected: Array<Datasource>) {
-        console.log(selected);
-
         this.props.setSelectedDatasources(selected);
         this.props.setSelectedBackendDatasources(toBackendDatasources(selected));
     }

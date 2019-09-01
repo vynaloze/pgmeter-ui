@@ -23,12 +23,18 @@ interface DispatchFromProps {
 
 type Props = StateFromProps & DispatchFromProps
 
+interface InternalState {
+    lastUpdateText: string
+}
 
-class Updater extends React.Component<Props> {
+class Updater extends React.Component<Props, InternalState> {
     private interval?: NodeJS.Timer;
 
     constructor(props: Props) {
         super(props);
+        this.state = {
+            lastUpdateText: ""
+        };
         this.autoUpdate = this.autoUpdate.bind(this);
         this.handleChange = this.handleChange.bind(this);
     }
@@ -45,6 +51,18 @@ class Updater extends React.Component<Props> {
         if (this.props.state.liveUpdates) {
             const period = differenceInSeconds(this.props.timeRange.displayedTimeRange.end, this.props.timeRange.displayedTimeRange.start);
             this.props.setDisplayedTimeRange(subSeconds(new Date(), period), new Date());
+        }
+
+        if (this.props.state.lastUpdate !== undefined) {
+            const text = "updated " + formatDistanceToNow(this.props.state.lastUpdate, {
+                includeSeconds: true,
+                addSuffix: true
+            })
+            if (text !== this.state.lastUpdateText) {
+                this.setState({
+                    lastUpdateText: text
+                })
+            }
         }
     }
 
@@ -101,12 +119,7 @@ class Updater extends React.Component<Props> {
                     </div>
                 </div>
                 <div className="row no-gutters small-text float-right text-right">
-                    {this.props.state.lastUpdate !== undefined ?
-                        <div>updated {formatDistanceToNow(this.props.state.lastUpdate, {
-                            includeSeconds: true,
-                            addSuffix: true
-                        })}</div>
-                        : null}
+                    {this.state.lastUpdateText}
                 </div>
             </div>
         )
