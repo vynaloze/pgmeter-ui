@@ -15,6 +15,7 @@ import {Series} from "../_store/stats/types";
 import * as Utils from "./Utils";
 import StyledLineChart from "../StyledLineChart";
 import {UpdaterState} from "../_store/updater/types";
+import {setTimeRange} from "../_store/timeRange/actions";
 
 interface StateFromProps {
     timeRange: TimeRangeState
@@ -27,36 +28,83 @@ interface DispatchFromProps {
     setAllTables: typeof setAllTables
     setDisplayedTables: typeof setDisplayedTables
     setTablesData: typeof setTablesData
+    setTimeRange: typeof setTimeRange
 }
 
 type Props = StateFromProps & DispatchFromProps
 
 class Tables extends React.Component<Props> {
+    private eventSource?: EventSource;
+
     constructor(props: Props) {
         super(props);
         this.handleTableSelection = this.handleTableSelection.bind(this);
         this.datasetFilter = this.datasetFilter.bind(this);
         this.datasetMapper = this.datasetMapper.bind(this);
         this.labelMapper = this.labelMapper.bind(this);
+        this.subscribe = this.subscribe.bind(this);
+        this.unsubscribe = this.unsubscribe.bind(this);
+        this.fetchData = this.fetchData.bind(this);
     }
 
     componentDidMount(): void {
-        if (this.props.datasources.selected.length > 0) {
-            this.fetchTables();
-            this.fetchTableData();
-        }
+        this.fetchData()
     }
 
     componentDidUpdate(prevProps: Readonly<StateFromProps & DispatchFromProps>, prevState: any, snapshot?: any): void {
-        if (Utils.SelectedDatasourcesHaveChanged(this.props.datasources.selected, prevProps.datasources.selected)) {
-            this.props.setTablesData({overview: [], charts: {}});
-            if (this.props.datasources.selected.length > 0) {
-                this.fetchTables();
-                this.fetchTableData();
-            } else {
-                this.props.setDisplayedTables([]);
-                this.props.setAllTables([]);
+        if (Utils.SelectedDatasourcesHaveChanged(this.props.datasources.selected, prevProps.datasources.selected)
+            || Utils.SelectedTimeRangeHasChanged(this.props.timeRange, prevProps.timeRange)) {
+            this.unsubscribe();
+            this.props.setTablesData({overview: this.props.tables.data.overview, charts: {}});
+            this.fetchData()
+        }
+        if (prevProps.updater.liveUpdates && !this.props.updater.liveUpdates) {
+            this.unsubscribe()
+        }
+        if (!prevProps.updater.liveUpdates && this.props.updater.liveUpdates) {
+            this.subscribe()
+        }
+    }
+
+    componentWillUnmount(): void {
+        this.unsubscribe()
+    }
+
+    subscribe() {
+        const ids = this.props.datasources.selectedBackend.map(bds => bds.id);
+        if (ids.length === 0) {
+            return;
+        }
+        const types = ["pg_stat_user_tables"];
+        this.eventSource = ApiClient.subscribe(ids, types);
+        this.eventSource.addEventListener("message", e => {
+            const event = JSON.parse(e.data);
+            if (!event.ignored) {
+                const tr = Utils.GetTimeRangeNow(this.props.timeRange.displayedTimeRange.start, this.props.timeRange.displayedTimeRange.end);
+                this.props.setTimeRange(tr.start, tr.end);
+                this.fetchData();
             }
+        });
+    }
+
+    unsubscribe() {
+        if (this.eventSource !== undefined) {
+            this.eventSource.close();
+            this.eventSource = undefined;
+        }
+    }
+
+    fetchData() {
+        if (this.props.datasources.selected.length > 0) {
+            this.fetchTables();
+            this.fetchTableData();
+        } else {
+            this.props.setDisplayedTables([]);
+            this.props.setAllTables([]);
+        }
+
+        if (this.props.updater.liveUpdates) {
+            this.subscribe()
         }
     }
 
@@ -417,5 +465,5 @@ function mapStateToProps(state: AppState): StateFromProps {
 
 export default connect<StateFromProps, DispatchFromProps, {}, AppState>(
     mapStateToProps,
-    {setAllTables, setDisplayedTables, setTablesData}
+    {setAllTables, setDisplayedTables, setTablesData, setTimeRange}
 )(Tables);
