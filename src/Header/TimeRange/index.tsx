@@ -1,10 +1,10 @@
 import React from 'react';
 import {connect} from "react-redux";
-import {AppState} from "../_store";
-import {setDisplayedTimeRange, setTimeRange} from "../_store/timeRange/actions";
-import './TimeRange.css'
-import {TimeRangeState} from "../_store/timeRange/types";
-import {setLiveUpdates} from "../_store/updater/actions";
+import {AppState} from "../../_store";
+import {setDisplayedTimeRange, setTimeRange} from "../../_store/timeRange/actions";
+import './index.css'
+import {TimeRangeState} from "../../_store/timeRange/types";
+import {setLiveUpdates} from "../../_store/updater/actions";
 // @ts-ignore
 import DateTimeRangePicker from '@wojtekmaj/react-datetimerange-picker'
 // @ts-ignore

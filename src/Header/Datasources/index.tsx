@@ -1,18 +1,18 @@
 import React from "react";
 import {connect} from "react-redux";
-import {BackendDatasource, Datasource, DatasourceState} from "../_store/datasources/types";
+import {BackendDatasource, Datasource, DatasourceState} from "../../_store/datasources/types";
 import {
     setBackendDatasources,
     setDatasources,
     setSelectedBackendDatasources,
     setSelectedDatasources
-} from "../_store/datasources/actions";
-import {AppState} from "../_store";
-import './Datasources.css'
-import ApiClient from "../ApiClient";
-import StyledSelect from "../StyledSelect";
-import {TimeRangeState} from "../_store/timeRange/types";
-import {UpdaterState} from "../_store/updater/types";
+} from "../../_store/datasources/actions";
+import {AppState} from "../../_store";
+import './index.css'
+import ApiClient from "../../ApiClient";
+import StyledSelect from "../../StyledSelect";
+import {TimeRangeState} from "../../_store/timeRange/types";
+import {UpdaterState} from "../../_store/updater/types";
 
 interface StateFromProps {
     timeRange: TimeRangeState

@@ -1,13 +1,13 @@
 import React from 'react';
 import {connect} from "react-redux";
-import {setDisplayedTimeRange} from "../_store/timeRange/actions";
-import {setLiveUpdates} from "../_store/updater/actions";
-import {UpdaterState} from "../_store/updater/types";
-import {AppState} from "../_store";
-import {TimeRangeState} from "../_store/timeRange/types";
+import {setDisplayedTimeRange} from "../../_store/timeRange/actions";
+import {setLiveUpdates} from "../../_store/updater/actions";
+import {UpdaterState} from "../../_store/updater/types";
+import {AppState} from "../../_store";
+import {TimeRangeState} from "../../_store/timeRange/types";
 import {differenceInSeconds, formatDistanceToNow, subSeconds} from "date-fns";
 import Switch from "react-switch";
-import './Updater.css'
+import './index.css'
 
 interface StateFromProps {
     state: UpdaterState
