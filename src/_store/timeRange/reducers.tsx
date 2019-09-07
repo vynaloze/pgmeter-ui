@@ -2,11 +2,11 @@ import {subDays} from "date-fns";
 import {SET_DISPLAYED_TIME_RANGE, SET_TIME_RANGE, TimeRangeActions, TimeRangeState} from "./types";
 
 const initialTimeRange: TimeRangeState = {
-    start: subDays(new Date(), 90),
+    start: subDays(new Date(), 1),
     end: new Date(),
 
     displayedTimeRange: {
-        start: subDays(new Date(), 90),
+        start: subDays(new Date(), 1),
         end: new Date(),
     },
 };

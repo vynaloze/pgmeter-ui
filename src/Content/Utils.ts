@@ -1,4 +1,4 @@
-import {differenceInDays, differenceInMinutes, format} from "date-fns";
+import {differenceInDays, differenceInMinutes, differenceInSeconds, format, subSeconds} from "date-fns";
 import {Datasource} from "../_store/datasources/types";
 import {TimeRange} from "../_store/timeRange/types";
 
@@ -31,4 +31,9 @@ export function SelectedDatasourcesHaveChanged(datasources1: Array<Datasource>, 
 
 export function SelectedTimeRangeHasChanged(range1: TimeRange, range2: TimeRange): boolean {
     return range1.start !== range2.start || range1.end !== range2.end;
+}
+
+export function GetTimeRangeNow(start: Date, end: Date): TimeRange {
+    const period = differenceInSeconds(end, start);
+    return {start: subSeconds(new Date(), period), end: new Date()}
 }

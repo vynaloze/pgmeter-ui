@@ -21,6 +21,7 @@ import {fromUnixTime, getUnixTime} from "date-fns";
 import * as Utils from "./Utils";
 import StyledLineChart from "../StyledLineChart";
 import {UpdaterState} from "../_store/updater/types";
+import {setTimeRange} from "../_store/timeRange/actions";
 
 
 interface StateFromProps {
@@ -32,9 +33,10 @@ interface StateFromProps {
 
 interface DispatchFromProps {
     setQueriesTable: typeof setQueriesTable
-    setQueriesDisplayed: typeof setQueriesDisplayed,
+    setQueriesDisplayed: typeof setQueriesDisplayed
     setQueriesTimeChart: typeof setQueriesTimeChart
     setQueriesCallsChart: typeof setQueriesCallsChart
+    setTimeRange: typeof setTimeRange
 }
 
 type Props = StateFromProps & DispatchFromProps
@@ -90,6 +92,8 @@ class Queries extends React.Component<Props> {
         this.eventSource.addEventListener("message", e => {
             const event = JSON.parse(e.data);
             if (!event.ignored) {
+                const tr = Utils.GetTimeRangeNow(this.props.timeRange.displayedTimeRange.start, this.props.timeRange.displayedTimeRange.end);
+                this.props.setTimeRange(tr.start, tr.end);
                 this.fetchData();
             }
         });
@@ -111,9 +115,10 @@ class Queries extends React.Component<Props> {
                     payload: r.payload
                 }));
                 this.props.setQueriesTable(table);
-                this.setState({error: null})
             }),
-            (error => this.setState({error: "Error fetching table data: " + error.toString()})));
+            (error => {
+                //todo error handling
+            }));
 
         // time chart
         const timeChartRequest = {
@@ -144,9 +149,10 @@ class Queries extends React.Component<Props> {
         ApiClient.getXyStats(timeChartRequest,
             (response => {
                 this.props.setQueriesTimeChart(response);
-                this.setState({error: null})
             }),
-            (error => this.setState({error: "Error fetching time chart data: " + error.toString()})));
+            (error => {
+                //todo error handling
+            }));
 
         // calls chart
         const callsChartRequest = {
@@ -177,9 +183,10 @@ class Queries extends React.Component<Props> {
         ApiClient.getXyStats(callsChartRequest,
             (response => {
                 this.props.setQueriesCallsChart(response);
-                this.setState({error: null})
             }),
-            (error => this.setState({error: "Error fetching calls chart data: " + error.toString()})));
+            (error => {
+                //todo error handling
+            }));
     }
 
     renderTable(): ReactNode {
@@ -315,5 +322,5 @@ function mapStateToProps(state: AppState): StateFromProps {
 
 export default connect<StateFromProps, DispatchFromProps, {}, AppState>(
     mapStateToProps,
-    {setQueriesTable, setQueriesDisplayed, setQueriesTimeChart, setQueriesCallsChart}
+    {setQueriesTable, setQueriesDisplayed, setQueriesTimeChart, setQueriesCallsChart, setTimeRange}
 )(Queries);

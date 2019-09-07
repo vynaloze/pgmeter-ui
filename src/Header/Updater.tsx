@@ -1,7 +1,7 @@
 import React from 'react';
 import {connect} from "react-redux";
-import {setDisplayedTimeRange, setTimeRange} from "../_store/timeRange/actions";
-import {setLastUpdate, setLiveUpdates} from "../_store/updater/actions";
+import {setDisplayedTimeRange} from "../_store/timeRange/actions";
+import {setLiveUpdates} from "../_store/updater/actions";
 import {UpdaterState} from "../_store/updater/types";
 import {AppState} from "../_store";
 import {TimeRangeState} from "../_store/timeRange/types";
@@ -15,10 +15,8 @@ interface StateFromProps {
 }
 
 interface DispatchFromProps {
-    setActualTimeRange: typeof setTimeRange
     setDisplayedTimeRange: typeof setDisplayedTimeRange
     setLiveUpdates: typeof setLiveUpdates
-    setLastUpdate: typeof setLastUpdate
 }
 
 type Props = StateFromProps & DispatchFromProps
@@ -57,7 +55,7 @@ class Updater extends React.Component<Props, InternalState> {
             const text = "updated " + formatDistanceToNow(this.props.state.lastUpdate, {
                 includeSeconds: true,
                 addSuffix: true
-            })
+            });
             if (text !== this.state.lastUpdateText) {
                 this.setState({
                     lastUpdateText: text
@@ -137,9 +135,7 @@ function mapStateToProps(state: AppState): StateFromProps {
 export default connect<StateFromProps, DispatchFromProps, {}, AppState>(
     mapStateToProps,
     {
-        setActualTimeRange: setTimeRange,
         setDisplayedTimeRange: setDisplayedTimeRange,
         setLiveUpdates: setLiveUpdates,
-        setLastUpdate: setLastUpdate
     }
 )(Updater);
