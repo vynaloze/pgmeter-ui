@@ -9,7 +9,8 @@ import {setLiveUpdates} from "../_store/updater/actions";
 import DateTimeRangePicker from '@wojtekmaj/react-datetimerange-picker'
 // @ts-ignore
 import onClickOutside from "react-onclickoutside";
-import {differenceInMilliseconds} from "date-fns";
+import {differenceInMilliseconds, subDays, subHours, subMinutes} from "date-fns";
+import QuickRanges from "./QuickRanges";
 
 interface StateFromProps {
     state: TimeRangeState
@@ -24,23 +25,30 @@ interface DispatchFromProps {
 type Props = StateFromProps & DispatchFromProps
 
 interface InternalState {
-    focusedOnBox: boolean
+    calendarOpen: boolean
+    quickRangesOpen: boolean
+    selectedQuickRange: string | null
 }
 
 
 class TimeRange extends React.Component<Props, InternalState> {
-    constructor(props: any) {
+    constructor(props: Props) {
         super(props);
         this.state = {
-            focusedOnBox: false
+            calendarOpen: false,
+            quickRangesOpen: false,
+            selectedQuickRange: "24 hours",
         };
+
         this.onChange = this.onChange.bind(this);
         this.handleClickOutside = this.handleClickOutside.bind(this);
         this.onRangePickerClicked = this.onRangePickerClicked.bind(this);
         this.onRangePickerClosed = this.onRangePickerClosed.bind(this);
+        this.setQuickTime = this.setQuickTime.bind(this);
     }
 
     onChange(date: Array<Date>) {
+        this.setState({selectedQuickRange: null});
         // if end date is not now (or almost now), stop the live updates
         if (differenceInMilliseconds(new Date(), date[1]) > 1000) {
             this.props.setLiveUpdates(false);
@@ -50,17 +58,18 @@ class TimeRange extends React.Component<Props, InternalState> {
 
     onRangePickerClicked() {
         this.setState({
-            focusedOnBox: true
+            calendarOpen: true,
+            quickRangesOpen: true,
         });
         this.props.setLiveUpdates(false);
-        console.log("click") //todo open quick ranges
     }
 
     onRangePickerClosed() {
-        if (this.state.focusedOnBox) {
+        if (this.state.calendarOpen) {
             this.props.setActualTimeRange(this.props.state.displayedTimeRange.start, this.props.state.displayedTimeRange.end);
             this.setState({
-                focusedOnBox: false
+                calendarOpen: false,
+                quickRangesOpen: false,
             });
         }
     }
@@ -68,21 +77,50 @@ class TimeRange extends React.Component<Props, InternalState> {
     // don't delete me
     handleClickOutside = () => {
         this.onRangePickerClosed();
+        this.setState({
+            calendarOpen: false,
+            quickRangesOpen: false,
+        });
     };
 
+    setQuickTime(amount: number, unit: string) {
+        const end = new Date();
+        let start;
+        switch (unit) {
+            case "min":
+                start = subMinutes(end, amount);
+                break;
+            case "hour":
+                start = subHours(end, amount);
+                break;
+            case "day":
+                start = subDays(end, amount);
+                break;
+            default:
+                start = new Date();
+        }
+        this.props.setDisplayedTimeRange(start, end);
+        this.props.setActualTimeRange(start, end);
+        this.props.setLiveUpdates(true);
+        this.setState({
+            selectedQuickRange: amount + " " + unit,
+        });
+    }
+
     render() {
-        // const ranges = {
-        // "Last 15 min": [this.state.now.clone().subtract(15, "minute"), this.state.now],
-        // "Last 30 min": [this.state.now.clone().subtract(30, "minute"), this.state.now],
-        // "Last 1 hour": [this.state.now.clone().subtract(1, "hour"), this.state.now],
-        // "Last 3 hours": [this.state.now.clone().subtract(3, "hour"), this.state.now],
-        // "Last 12 hours": [this.state.now.clone().subtract(12, "hour"), this.state.now],
-        // "Last 24 hours": [this.state.now.clone().subtract(24, "hour"), this.state.now],
-        // "Last 2 days": [this.state.now.clone().subtract(2, "day"), this.state.now],
-        // "Last 7 days": [this.state.now.clone().subtract(7, "day"), this.state.now],
-        // "Last 30 days": [this.state.now.clone().subtract(30, "day"), this.state.now],
-        // "Last 90 days": [this.state.now.clone().subtract(90, "day"), this.state.now],
-        // }; //fixme - implement quick ranges by myself
+        const ranges = [
+            {title: "Last 15 min", onClick: () => this.setQuickTime(15, "min")},
+            {title: "Last 30 min", onClick: () => this.setQuickTime(30, "min")},
+            {title: "Last 1 hour", onClick: () => this.setQuickTime(1, "hour")},
+            {title: "Last 3 hours", onClick: () => this.setQuickTime(3, "hour")},
+            {title: "Last 12 hours", onClick: () => this.setQuickTime(12, "hour")},
+            {title: "Last 24 hours", onClick: () => this.setQuickTime(24, "hour")},
+            {title: "Last 2 days", onClick: () => this.setQuickTime(2, "day")},
+            {title: "Last 7 days", onClick: () => this.setQuickTime(7, "day")},
+            {title: "Last 30 days", onClick: () => this.setQuickTime(30, "day")},
+            {title: "Last 90 days", onClick: () => this.setQuickTime(90, "day")},
+        ];
+
         return (
             <div className="TimeRange" onClick={this.onRangePickerClicked}>
                 <DateTimeRangePicker
@@ -90,10 +128,19 @@ class TimeRange extends React.Component<Props, InternalState> {
                     clearIcon={null}
                     disableClock={true}
                     format={"yyyy-MM-dd H:mm:ss"}
+                    isCalendarOpen={this.state.calendarOpen}
                     onChange={this.onChange}
                     onCalendarClose={this.onRangePickerClosed}
                     value={[this.props.state.displayedTimeRange.start, this.props.state.displayedTimeRange.end]}
+                    locale={"en-EN"}
                 />
+                <div className="Ranges">
+                    <QuickRanges
+                        isOpen={this.state.quickRangesOpen}
+                        ranges={ranges}
+                        selected={this.state.selectedQuickRange}
+                    />
+                </div>
             </div>
         );
     }

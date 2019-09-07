@@ -3,6 +3,13 @@
     position: relative;
 }
 
+.TimeRange .Ranges {
+    position: absolute;
+    top: 51px;
+    right: -52px;
+    z-index: 1;
+}
+
 /* override style of date time range picker */
 
 .TimeRange .react-datetimerange-picker {

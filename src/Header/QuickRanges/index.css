@@ -1,0 +1,25 @@
+.QuickRanges {
+    width: 120px;
+    color: var(--text);
+    background: var(--bg-header);
+}
+
+.QuickRanges li {
+    font-weight: 200;
+    font-size-adjust: 0.45;
+}
+
+.QuickRanges .active,
+.QuickRanges span:hover {
+    color: var(--blue);
+    background: var(--bg-header-hover);
+    border-left: 4px solid var(--blue);
+}
+
+.QuickRanges span {
+    color: var(--text);
+    display: block;
+    padding: 10px;
+    transition: all 0.3s ease;
+    cursor: default;
+}
