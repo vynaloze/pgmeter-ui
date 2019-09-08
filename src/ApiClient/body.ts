@@ -1,6 +1,6 @@
 export default interface TranslateRequest {
     filter: Filter
-    params: Params
+    params: Array<Params>
 }
 
 export interface Filter {
@@ -24,4 +24,9 @@ export enum ParamType {
     TIMESTAMP = "timestamp",
     DATASOURCE = "datasource",
     KEY = "key",
+}
+
+export interface TranslatedStats {
+    params: Params
+    data: any
 }

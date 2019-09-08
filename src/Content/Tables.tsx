@@ -8,7 +8,7 @@ import {setAllTables, setDisplayedTables, setTablesData} from '../_store/stats/t
 import ApiClient from "../ApiClient";
 import {AppState} from "../_store";
 import {connect} from "react-redux";
-import TranslateRequest from "../ApiClient/body";
+import TranslateRequest, {TranslatedStats} from "../ApiClient/body";
 import VerticalTable from "../VerticalTable";
 import {format, formatDistanceToNow, fromUnixTime, getUnixTime, isValid, parseISO} from "date-fns";
 import {Series} from "../_store/stats/types";
@@ -174,43 +174,47 @@ class Tables extends React.Component<Props> {
     fetchChartData() {
         const xyKeys = ["seq_scan", "seq_tup_fetch", "idx_scan", "idx_tup_fetch", "live_tup", "dead_tup", "ins_tup",
             "upd_tup", "del_tup", "vacuum_count", "autovacuum_count", "analyze_count", "autoanalyze_count"];
-        xyKeys.forEach((k: string) => {
-            const req = {
-                filter: {
-                    timestampFrom: getUnixTime(this.props.timeRange.start),
-                    timestampTo: getUnixTime(this.props.timeRange.end),
-                    type: "pg_stat_user_tables",
-                    datasourceIds: this.props.datasources.selectedBackend.map(d => d.id)
-                },
-                params: {
-                    x: {
-                        name: "ts",
-                        type: "timestamp"
-                    },
-                    y: {
-                        name: k,
-                        type: "key"
-                    },
-                    dimension: [{
-                        name: "ds",
-                        type: "datasource"
-                    }, {
-                        name: "table",
-                        type: "key"
-                    }]
-                }
-            } as TranslateRequest;
-            let data = this.props.tables.data;
-            ApiClient.getXyStats(req,
-                (response => {
+        const params = xyKeys.map((k: string) => ({
+            x: {
+                name: "ts",
+                type: "timestamp"
+            },
+            y: {
+                name: k,
+                type: "key"
+            },
+            dimension: [{
+                name: "ds",
+                type: "datasource"
+            }, {
+                name: "table",
+                type: "key"
+            }]
+        }));
+        const req = {
+            filter: {
+                timestampFrom: getUnixTime(this.props.timeRange.start),
+                timestampTo: getUnixTime(this.props.timeRange.end),
+                type: "pg_stat_user_tables",
+                datasourceIds: this.props.datasources.selectedBackend.map(d => d.id)
+            },
+            params: params
+        } as TranslateRequest;
+
+        let data = this.props.tables.data;
+        ApiClient.getXyStats(req,
+            (response => {
+                response.forEach((e: TranslatedStats) => {
+                    const key = e.params.y.name;
                     // @ts-ignore
-                    data.charts[k] = response;
-                    this.props.setTablesData(data);
-                }),
-                (error => {
-                    //todo error handling
-                }));
-        })
+                    data.charts[key] = e.data;
+                });
+                this.props.setTablesData(data);
+            }),
+            (error => {
+                //todo error handling
+            }));
+
     }
 
     handleTableSelection(selected: Array<Table>) {

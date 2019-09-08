@@ -6,7 +6,7 @@ import {SystemState} from "../_store/stats/system/types";
 import {AppState} from "../_store";
 import {connect} from "react-redux";
 import * as Utils from "./Utils";
-import TranslateRequest from "../ApiClient/body";
+import TranslateRequest, {TranslatedStats} from "../ApiClient/body";
 import ApiClient from "../ApiClient";
 import {setSystemData} from '../_store/stats/system/actions';
 import StyledLineChart from "../StyledLineChart";
@@ -58,22 +58,25 @@ export class System extends React.Component<Props> {
         };
 
         Object.keys(types).forEach(type => {
-            this.makeRequests(type, types[type]);
+            this.makeRequest(type, types[type]);
         })
     }
 
-    makeRequests(type: string, keys: Array<string>) {
-        keys.forEach(key => {
-            let data = this.props.system.data;
-            this.makeRequest(type, key, (response => {
-                // @ts-ignore
-                data[type][key] = response;
-                this.props.setSystemData(data);
-            }))
-        })
-    }
-
-    makeRequest(type: string, key: string, callback: (response: any) => void) {
+    makeRequest(type: string, keys: Array<string>) {
+        const params = keys.map((k: string) => ({
+            x: {
+                name: "ts",
+                type: "timestamp"
+            },
+            y: {
+                name: k,
+                type: "key"
+            },
+            dimension: [{
+                name: "ds",
+                type: "datasource"
+            }]
+        }));
         const req = {
             filter: {
                 timestampFrom: getUnixTime(this.props.timeRange.start),
@@ -81,28 +84,23 @@ export class System extends React.Component<Props> {
                 type: type,
                 datasourceIds: this.props.datasources.selectedBackend.map(d => d.id)
             },
-            params: {
-                x: {
-                    name: "ts",
-                    type: "timestamp"
-                },
-                y: {
-                    name: key,
-                    type: "key"
-                },
-                dimension: [{
-                    name: "ds",
-                    type: "datasource"
-                }]
-            }
+            params: params
         } as TranslateRequest;
 
+        let data = this.props.system.data;
         ApiClient.getXyStats(req,
             (response => {
-                callback(response);
-                this.setState({error: null})
+                response.forEach((e: TranslatedStats) => {
+                    const key = e.params.y.name;
+                    // @ts-ignore
+                    data[type][key] = e.data;
+                    this.props.setSystemData(data);
+                });
+                this.props.setSystemData(data);
             }),
-            (error => this.setState({error: "Error fetching data: " + error.toString()})));
+            (error => {
+                //todo error handling
+            }));
     }
 
     datasetFilter(dataset: Series): boolean {

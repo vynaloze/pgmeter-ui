@@ -1,5 +1,5 @@
 import {getUnixTime} from "date-fns";
-import TranslateRequest from "./body";
+import TranslateRequest, {TranslatedStats} from "./body";
 import store from '../_store'
 import {decrementLoading, incrementLoading, setLastUpdate} from '../_store/updater/actions'
 // @ts-ignore
@@ -20,7 +20,7 @@ export default class ApiClient {
             onError);
     }
 
-    static getXyStats(request: TranslateRequest, onSuccess: ((response: any) => void), onError?: ((error: any) => void)) {
+    static getXyStats(request: TranslateRequest, onSuccess: ((response: Array<TranslatedStats>) => void), onError?: ((error: any) => void)) {
         this.performPost(this.API_ENDPOINT + "/stats/translate",
             JSON.stringify(request),
             onSuccess,

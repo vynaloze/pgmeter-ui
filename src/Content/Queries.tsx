@@ -128,7 +128,7 @@ class Queries extends React.Component<Props> {
                 type: "pg_stat_statements",
                 datasourceIds: this.props.datasources.selectedBackend.map(d => d.id)
             },
-            params: {
+            params: [{
                 x: {
                     name: "ts",
                     type: "timestamp"
@@ -144,11 +144,11 @@ class Queries extends React.Component<Props> {
                     name: "query",
                     type: "key"
                 }]
-            }
+            }]
         } as TranslateRequest;
         ApiClient.getXyStats(timeChartRequest,
             (response => {
-                this.props.setQueriesTimeChart(response);
+                this.props.setQueriesTimeChart(response[0].data);
             }),
             (error => {
                 //todo error handling
@@ -162,7 +162,7 @@ class Queries extends React.Component<Props> {
                 type: "pg_stat_statements",
                 datasourceIds: this.props.datasources.selectedBackend.map(d => d.id)
             },
-            params: {
+            params: [{
                 x: {
                     name: "ts",
                     type: "timestamp"
@@ -178,11 +178,11 @@ class Queries extends React.Component<Props> {
                     name: "query",
                     type: "key"
                 }]
-            }
+            }]
         } as TranslateRequest;
         ApiClient.getXyStats(callsChartRequest,
             (response => {
-                this.props.setQueriesCallsChart(response);
+                this.props.setQueriesCallsChart(response[0].data);
             }),
             (error => {
                 //todo error handling
