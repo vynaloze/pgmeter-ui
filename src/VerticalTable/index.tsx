@@ -31,12 +31,11 @@ export default class VerticalTable extends React.Component<Props, InternalState>
         this.next = this.next.bind(this);
     }
 
-    componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<InternalState>, snapshot?: any): void {
-        if (prevProps.entries !== this.props.entries) {
-            this.setState({
-                displayedIndex: 0
-            })
-        }
+    static entriesHaveChanged(entries1: Array<Entry>, entries2: Array<Entry>): boolean {
+        if (entries1.length !== entries2.length) return true;
+        const keys1 = entries1.map(e => e.key);
+        const keys2 = entries2.map(e => e.key);
+        return !(keys1.every(k => keys2.includes(k)) && keys2.every(k => keys1.includes(k)));
     }
 
     isPaginated(): boolean {
@@ -65,6 +64,13 @@ export default class VerticalTable extends React.Component<Props, InternalState>
             });
     }
 
+    componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<InternalState>, snapshot?: any): void {
+        if (VerticalTable.entriesHaveChanged(prevProps.entries, this.props.entries)) {
+            this.setState({
+                displayedIndex: 0
+            })
+        }
+    }
 
     render() {
         if (this.props.entries.length < 1) {
@@ -76,7 +82,7 @@ export default class VerticalTable extends React.Component<Props, InternalState>
         let content: any[] = [];
         keys.forEach((key: string) =>
             content.push(
-                <tr>
+                <tr key={key}>
                     <th style={{width: '25%'}} scope="row">{key}</th>
                     <td style={{width: '75%'}}>{entry.data[key]}</td>
                 </tr>
